@@ -36,6 +36,17 @@ public class TestService {
                 // Получение результатов и присвоение их текущему тесту.
                 TestResultGroupService testResultService = new TestResultGroupService();
                 List<TestResultGroup> results = testResultService.getTestResultGroups(testNode);
+                // Если у теста нет результатов, создаётся специальный один результат помеченный флагом 'single',
+                // потом такие результаты будут объединены в один общий тест.
+                if (results.isEmpty()) {
+                    TestResultGroup singleGroup = new TestResultGroup();
+                    singleGroup.setName(result.getName());
+                    singleGroup.setStatus(String.valueOf(testNode.get("Outcome").get("value")).replaceAll("\"", ""));
+                    singleGroup.setResults(new ArrayList<>());
+                    singleGroup.setSelected(true);
+                    singleGroup.setEmpty(true);
+                    results.add(singleGroup);
+                }
                 result.setResultGroups(results);
                 return Optional.of(result);
             } else {

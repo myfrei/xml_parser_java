@@ -57,6 +57,9 @@ public class XMLViewerMainController {
     private CheckBox skipUserDefinedFlag;
 
     @FXML
+    private CheckBox skipEmptyResultsFlag;
+
+    @FXML
     private ComboBox<String> roundingChooser;
 
     @FXML
@@ -76,6 +79,7 @@ public class XMLViewerMainController {
         // Делает неактивной инпут пути к папке и кнопку "Выбрать папку".
         chooseFolderButton.setDisable(true);
         folderPathInput.setDisable(true);
+        changeFolderByPathButton.setDisable(true);
         // Заполняет выпадающий список для выбора варианта округления результата.
         roundingChooser.setItems(FXCollections.observableArrayList(RoundingOptionals.getListOfRoundingOptions()));
         roundingChooser.setValue(RoundingOptionals.NO_ROUND.getTitle());
@@ -105,6 +109,7 @@ public class XMLViewerMainController {
         anotherDirectoriesFlag.setOnAction(actionEvent -> {
             chooseFolderButton.setDisable(!anotherDirectoriesFlag.isSelected());
             folderPathInput.setDisable(!anotherDirectoriesFlag.isSelected());
+            changeFolderByPathButton.setDisable(!anotherDirectoriesFlag.isSelected());
         });
 
         // Выбор папки с файлами.
@@ -120,9 +125,14 @@ public class XMLViewerMainController {
             }
         });
 
-        // Слушает флаг "Set UserDefined" и изменяет соответствующее глобальное состояние.
+        // Слушает флаг "Skip UserDefined" и изменяет соответствующее глобальное состояние.
         skipUserDefinedFlag.setOnAction(actionEvent -> {
             GlobalStates.setUserDefined(!skipUserDefinedFlag.isSelected());
+        });
+
+        // Слушает флаг "Skip empty results" и изменяет соответствующее глобальное состояние.
+        skipEmptyResultsFlag.setOnAction(actionEvent -> {
+            GlobalStates.setShowEmptyResults(!skipEmptyResultsFlag.isSelected());
         });
 
         // Слушает выпадающий список с вариатами округления результата и по изменению изменяет соответствющее глобальное состояние.

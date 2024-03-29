@@ -10,10 +10,10 @@ public class GlobalVariables {
     public static final String IMAGE_PATH = "/images/photo.png";
     public static final List<String> TARGET_TESTS_TAG_NAMES = List.of("Test", "TestGroup", "SessionAction");
     public static final String VALID_VALUES_UNDEFINED = "Не определено";
-
+    public static final String EMPTY_RESULTS_LABEL = "Общие результаты";
     // Main window
     public static final String MAIN_WINDOW_TITLE = "XML Viewer";
-    public static final int[] MAIN_WINDOW_SIZES = new int[] {850, 350};
+    public static final int[] MAIN_WINDOW_SIZES = new int[] {890, 390};
     public static final String CHOOSE_DIRECTORY_ALERT_MESSAGE = "Не корректно выбрана папка, проверьте правильность выбора.";
     public static final String CHOOSE_FILE_ALERT_MESSAGE = "Не выбран файл, операция не может быть выполнена.";
     public static final String INCORRECT_FILE_DATA_MESSAGE = "Не удалось получить данные из файла.\n Возможно неверная структура XML.";

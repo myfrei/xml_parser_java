@@ -7,6 +7,7 @@ public class TestResultGroup {
     private String status;
     private List<TestResult> results;
     private boolean selected;
+    private boolean empty;
 
     public String getName() {
         return name;
@@ -36,5 +37,12 @@ public class TestResultGroup {
     }
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+    public boolean isEmpty() {
+        return this.empty;
+    }
+
+    public void setEmpty(boolean empty) {
+        this.empty = empty;
     }
 }

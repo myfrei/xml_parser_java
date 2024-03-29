@@ -3,6 +3,7 @@ package ru.white.xml_parser_java.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import ru.white.xml_parser_java.model.Test;
 import ru.white.xml_parser_java.model.TestGroup;
+import ru.white.xml_parser_java.model.TestResultGroup;
 import ru.white.xml_parser_java.util.GlobalStates;
 import ru.white.xml_parser_java.util.GlobalVariables;
 import ru.white.xml_parser_java.util.JsonNodeManager;
@@ -18,7 +19,11 @@ public class TestGroupService {
     public List<TestGroup> getTestGroupsByTagName(JsonNode node) {
         List<TestGroup> result = new ArrayList<>();
         for (JsonNode testGroupNode : JsonNodeManager.separateUnitedNodes(node)) {
-            getTestGroupByNode(testGroupNode).ifPresent(result::add);
+            getTestGroupByNode(testGroupNode).ifPresent(testGroup -> {
+                if (GlobalStates.isShowEmptyResults() || !checkTestGroupForEmptyResult(testGroup)) {
+                    result.add(testGroup);
+                }
+            });
         }
         return result;
     }
@@ -46,7 +51,7 @@ public class TestGroupService {
                         }
                     }
                 });
-                result.setTests(tests);
+                result.setTests(mergeEmptyTests(tests));
                 return Optional.of(result);
             } else {
                 return Optional.empty();
@@ -62,6 +67,40 @@ public class TestGroupService {
         return outcomeStatus.equals("Passed")
                 || outcomeStatus.equals("Failed")
                 || (GlobalStates.isUserDefined() && outcomeStatus.equals("UserDefined"));
+    }
+
+    // Возвращает 'true' если группа тестов содержит только пустые результаты.
+    private boolean checkTestGroupForEmptyResult(TestGroup testGroup) {
+        for (Test test : testGroup.getTests()) {
+            for (TestResultGroup resultGroup : test.getResultGroups()) {
+                if (!resultGroup.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Объединяет в один 'Общий результат' тесты у которых нет результатов (только специально созданый empty)
+    private List<Test> mergeEmptyTests(List<Test> tests) {
+        List<Test> result = new ArrayList<>();
+        List<TestResultGroup> emptyResults = new ArrayList<>();
+        // Ищет 'empty' результаты и собирает их в отдельный список.
+        tests.forEach(test -> {
+            if (test.getResultGroups().size() > 1 || !test.getResultGroups().get(0).isEmpty()) {
+                result.add(test);
+            } else {
+                emptyResults.add(test.getResultGroups().get(0));
+            }
+        });
+        // Если 'empty' результаты найдены создаёт отдельный тесто под них и добавляет его в результирующий список.
+        if (!emptyResults.isEmpty() && GlobalStates.isShowEmptyResults()) {
+            Test test = new Test();
+            test.setName(GlobalVariables.EMPTY_RESULTS_LABEL);
+            test.setResultGroups(emptyResults);
+            result.add(test);
+        }
+        return result;
     }
 }
 
