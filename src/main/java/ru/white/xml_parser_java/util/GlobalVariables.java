@@ -13,10 +13,11 @@ public class GlobalVariables {
 
     // Main window
     public static final String MAIN_WINDOW_TITLE = "XML Viewer";
-    public static final int[] MAIN_WINDOW_SIZES = new int[] {800, 300};
+    public static final int[] MAIN_WINDOW_SIZES = new int[] {850, 350};
     public static final String CHOOSE_DIRECTORY_ALERT_MESSAGE = "Не корректно выбрана папка, проверьте правильность выбора.";
     public static final String CHOOSE_FILE_ALERT_MESSAGE = "Не выбран файл, операция не может быть выполнена.";
     public static final String INCORRECT_FILE_DATA_MESSAGE = "Не удалось получить данные из файла.\n Возможно неверная структура XML.";
+    public static String getIncorrectFolderPathMessage(String path) { return "Не существующий путь: " + path; }
 
     // Result window
     public static final String RESULT_WINDOW_TITLE = "Результаты тестов";

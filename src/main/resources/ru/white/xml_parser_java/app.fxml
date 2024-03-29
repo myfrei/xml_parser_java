@@ -7,26 +7,30 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
-
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<Pane id="appMainContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="800.0" style="-fx-background-color: #c2dae4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.white.xml_parser_java.XMLViewerMainController">
-      <Pane id="appSideContainer" prefHeight="300.0" prefWidth="500.0">
-            <TextField fx:id="fileNameInput" layoutX="10.0" layoutY="20.0" prefHeight="25.0" prefWidth="480.0" />
-            <Button fx:id="chooseFolderButton" layoutX="392.0" layoutY="182.0" mnemonicParsing="false" text="Выбрать папку" textFill="#5b6671" />
-            <CheckBox fx:id="anotherDirectoriesFlag" layoutX="14.0" layoutY="186.0" mnemonicParsing="false" text="Разрешить выбор файлов из других директорий" textFill="#5b6671" />
-            <ListView fx:id="rootDirectoryViewer" layoutX="10.0" layoutY="55.0" prefHeight="120.0" prefWidth="480.0" />
-            <CheckBox fx:id="skipUserDefinedFlag" layoutX="14.0" layoutY="207.0" mnemonicParsing="false" text="Skip UserDefined" textFill="#5b6671" />
-            <ComboBox fx:id="roundingChooser" layoutX="14.0" layoutY="238.0" prefHeight="25.0" prefWidth="221.0" />
-            <Button fx:id="instructionButton" layoutX="6.0" layoutY="270.0" mnemonicParsing="false" style="-fx-background-color: none;" text="Инструкция" textFill="#5b6671" />
-            <Button fx:id="startButton" layoutX="392.0" layoutY="240.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="97.0" style="-fx-background-color: #bb1919;" text="Start" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
+<Pane id="appMainContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="850.0" style="-fx-background-color: #E2E6E9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.white.xml_parser_java.XMLViewerMainController">
+      <Pane id="appSideContainer" prefHeight="350.0" prefWidth="500.0">
+            <TextField fx:id="fileNameInput" layoutX="10.0" layoutY="70.0" prefHeight="25.0" prefWidth="480.0" />
+            <Button fx:id="chooseFolderButton" layoutX="392.0" layoutY="236.0" mnemonicParsing="false" text="Выбрать папку" textFill="#5b6671" />
+            <CheckBox fx:id="anotherDirectoriesFlag" layoutX="14.0" layoutY="240.0" mnemonicParsing="false" text="Разрешить выбор файлов из других директорий" textFill="#5b6671" />
+            <ListView fx:id="rootDirectoryViewer" layoutX="10.0" layoutY="109.0" prefHeight="120.0" prefWidth="480.0" />
+            <CheckBox fx:id="skipUserDefinedFlag" layoutX="14.0" layoutY="261.0" mnemonicParsing="false" text="Skip UserDefined" textFill="#5b6671" />
+            <ComboBox fx:id="roundingChooser" layoutX="14.0" layoutY="292.0" prefHeight="25.0" prefWidth="221.0" />
+            <Button fx:id="instructionButton" layoutX="6.0" layoutY="324.0" mnemonicParsing="false" style="-fx-background-color: none;" text="Инструкция" textFill="#5b6671" />
+            <Button fx:id="startButton" layoutX="392.0" layoutY="294.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="97.0" style="-fx-background-color: #5b6671;" text="Start" textFill="WHITE">
+                  <font>
+                        <Font name="System Bold" size="14.0" />
+                  </font>
             </Button>
+            <TextField fx:id="folderPathInput" layoutX="10.0" layoutY="21.0" prefHeight="25.0" prefWidth="404.0" />
+            <Text fill="#5b6671" layoutX="10.0" layoutY="66.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Имя файла:" />
+            <Text fill="#5b6671" layoutX="11.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Путь к папке:" />
+            <Button fx:id="changeFolderByPathButton" layoutX="425.0" layoutY="21.0" mnemonicParsing="false" text="Перейти" textFill="#5b6671" />
       </Pane>
-      <Pane id="imageSideContainer" layoutX="500.0" prefHeight="300.0" prefWidth="300.0" style="-fx-background-color: #c2dae4;">
-            <ImageView fx:id="imageView" fitHeight="280.0" fitWidth="280.0" layoutX="10.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
+      <Pane id="imageSideContainer" layoutX="500.0" prefHeight="350.0" prefWidth="352.0" style="-fx-background-color: #cad1d7;">
+            <ImageView fx:id="imageView" fitHeight="330.0" fitWidth="330.0" layoutX="10.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
             </ImageView>
       </Pane>
 </Pane>

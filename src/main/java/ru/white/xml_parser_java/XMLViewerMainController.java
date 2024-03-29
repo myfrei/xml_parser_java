@@ -39,6 +39,12 @@ public class XMLViewerMainController {
     private TextField fileNameInput;
 
     @FXML
+    private TextField folderPathInput;
+
+    @FXML
+    private Button changeFolderByPathButton;
+
+    @FXML
     private ListView<String> rootDirectoryViewer;
 
     @FXML
@@ -67,8 +73,9 @@ public class XMLViewerMainController {
         currentDirectoryFiles = fileService.getFilesByDirectory(GlobalVariables.ROOT_DIRECTORY_PATH);
         // Заполняет окно для просмотра файлов списком файлов из корневой директории
         rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
-        // Делает неактивной кнопку "Выбрать папку"
+        // Делает неактивной инпут пути к папке и кнопку "Выбрать папку".
         chooseFolderButton.setDisable(true);
+        folderPathInput.setDisable(true);
         // Заполняет выпадающий список для выбора варианта округления результата.
         roundingChooser.setItems(FXCollections.observableArrayList(RoundingOptionals.getListOfRoundingOptions()));
         roundingChooser.setValue(RoundingOptionals.NO_ROUND.getTitle());
@@ -83,16 +90,28 @@ public class XMLViewerMainController {
                     .collect(Collectors.toList());
             rootDirectoryViewer.setItems(FXCollections.observableArrayList(fileNamesListBasedOnQuery));
         });
+        // Осуществляет переход по указанному в 'folderPathInput' пути по нажатию Enter при активном инпуте.
+        folderPathInput.setOnAction(event -> {
+            if (event.getEventType().toString().equals("ACTION")) {
+                changeFolderByPath();
+            }
+        });
 
-        // Слушает флаг "Разрешить выбор файлов из других папок" и делает активной/не активной соответствующую кнопку.
+        // Осуществляет переход по указанному в 'folderPathInput' пути по нажатию кнопи 'Перейти' рядом с инпутом.
+        changeFolderByPathButton.setOnAction(event -> {
+            changeFolderByPath();
+        });
+        // Слушает флаг "Разрешить выбор файлов из других папок" и делает активной/не активной соответствующие кнопку и инпут.
         anotherDirectoriesFlag.setOnAction(actionEvent -> {
             chooseFolderButton.setDisable(!anotherDirectoriesFlag.isSelected());
+            folderPathInput.setDisable(!anotherDirectoriesFlag.isSelected());
         });
 
         // Выбор папки с файлами.
         chooseFolderButton.setOnAction(event -> {
             File selectedFolder = directoryChooser.showDialog(((Node) event.getTarget()).getScene().getWindow());
             if (selectedFolder != null) {
+                folderPathInput.setText(selectedFolder.getAbsolutePath());
                 currentDirectoryFiles.clear();
                 currentDirectoryFiles.addAll(fileService.getFilesByDirectory(selectedFolder.getAbsolutePath()));
                 rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
@@ -135,6 +154,18 @@ public class XMLViewerMainController {
         instructionButton.setOnAction(actionEvent -> {
             openInstructionWindow();
         });
+    }
+
+    // Открывает папку путь которой указан в 'folderPathInput'.
+    private void changeFolderByPath() {
+        File selectedFolder = new File(folderPathInput.getText());
+        if (selectedFolder.exists()) {
+            currentDirectoryFiles.clear();
+            currentDirectoryFiles.addAll(fileService.getFilesByDirectory(folderPathInput.getText()));
+            rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
+        } else  {
+            AlertService.openAlertWindow(GlobalVariables.getIncorrectFolderPathMessage(folderPathInput.getText()));
+        }
     }
 
     // Возвращает список имён файлов для отображения в главном окне.
