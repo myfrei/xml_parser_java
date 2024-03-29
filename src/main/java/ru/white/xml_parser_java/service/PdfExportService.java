@@ -14,13 +14,14 @@ import ru.white.xml_parser_java.util.GlobalVariables;
 import java.awt.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 public class PdfExportService {
     // Создаёт PDF файл в переданной директории.
-    public void getPDF(List<TestGroup> testGroups, String folderPath) {
+    public void getPDF(List<TestGroup> testGroups, LocalDate date, String folderPath) {
         try (Document document = new Document()) {
-            PdfWriter.getInstance(document, new FileOutputStream(folderPath + "\\" + GlobalVariables.PDF_FILE_NAME));
+            PdfWriter.getInstance(document, new FileOutputStream(folderPath + "\\" + GlobalVariables.getPdfFileName(date)));
             document.open();
 
             Paragraph docTitle = new Paragraph();
@@ -28,7 +29,7 @@ public class PdfExportService {
             Font docTitleDateFont = new Font(null, 12, Font.BOLD);
             docTitle.setAlignment(Element.ALIGN_CENTER);
             docTitle.add(new Chunk(GlobalVariables.PDF_TITLE, docTitleFont));
-            docTitle.add(new Chunk(GlobalVariables.PDF_TITLE_DATE, docTitleDateFont));
+            docTitle.add(new Chunk(GlobalVariables.getPdfTitleDate(date), docTitleDateFont));
             document.add(docTitle);
             document.add(new Paragraph("\n\n"));
 

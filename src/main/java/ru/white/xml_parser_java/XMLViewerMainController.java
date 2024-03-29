@@ -13,6 +13,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import ru.white.xml_parser_java.controller.InstructionController;
 import ru.white.xml_parser_java.controller.TestResultController;
+import ru.white.xml_parser_java.model.FileData;
 import ru.white.xml_parser_java.model.RoundingOptionals;
 import ru.white.xml_parser_java.model.TestGroup;
 import ru.white.xml_parser_java.service.FileService;
@@ -148,9 +149,9 @@ public class XMLViewerMainController {
                         .filter(f -> f.getName().equals(rootDirectoryViewer.getSelectionModel().getSelectedItem()))
                         .findAny();
                 if (selectedFile.isPresent()) {
-                    List<TestGroup> testGroupsFromFile = fileService.getDataFromFile(selectedFile.get());
-                    if (testGroupsFromFile.size() > 0) {
-                        openResultWindow(testGroupsFromFile.stream().sorted().collect(Collectors.toList()));
+                    FileData fileData = fileService.getDataFromFile(selectedFile.get());
+                    if (fileData.getTestGroups().size() > 0) {
+                        openResultWindow(fileData, selectedFile.get().getName());
                     }
                 } else {
                     AlertService.openAlertWindow(GlobalVariables.CHOOSE_FILE_ALERT_MESSAGE);
@@ -184,14 +185,14 @@ public class XMLViewerMainController {
     }
 
     // Открывает окно с результатами тестов
-    private void openResultWindow(List<TestGroup> testGroups) {
+    private void openResultWindow(FileData fileData, String fileName) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(XMLViewerApplication.class.getResource("test-results.fxml"));
-            TestResultController testResultController = new TestResultController(testGroups);
+            TestResultController testResultController = new TestResultController(fileData);
             fxmlLoader.setController(testResultController);
             Scene scene = new Scene(fxmlLoader.load(), GlobalVariables.RESULT_WINDOW_SIZES[0], GlobalVariables.RESULT_WINDOW_SIZES[1]);
             Stage stage = new Stage();
-            stage.setTitle(GlobalVariables.RESULT_WINDOW_TITLE);
+            stage.setTitle(fileName);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
