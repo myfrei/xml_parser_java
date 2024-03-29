@@ -2,6 +2,8 @@ package ru.white.xml_parser_java.util;
 
 import ru.white.xml_parser_java.model.RoundingOptionals;
 
+import java.math.BigDecimal;
+
 // Глобальные состояния
 public class GlobalStates {
 
@@ -28,6 +30,32 @@ public class GlobalStates {
     }
     public static void setRoundingOptional(RoundingOptionals roundingOptional) {
         GlobalStates.roundingOptional = roundingOptional;
+    }
+
+    // Парсит строку и округляет согласно состоянию 'roundingOptional' и возвращает значение.
+    public static String getRoundedValue(String value) {
+        if (!roundingOptional.equals(RoundingOptionals.NO_ROUND)) {
+            try {
+                double doubleValue = Double.parseDouble(value);
+                BigDecimal bigDecimal = new BigDecimal(doubleValue);
+                switch (roundingOptional) {
+                    case TWO_UP:
+                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_UP));
+                    case TWO_DOWN:
+                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_DOWN));
+                    case THREE_UP:
+                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_UP));
+                    case THREE_DOWN:
+                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_DOWN));
+                    default:
+                        return String.valueOf(doubleValue);
+                }
+            } catch (Exception ex) {
+                return value;
+            }
+        } else {
+            return value;
+        }
     }
 }
 

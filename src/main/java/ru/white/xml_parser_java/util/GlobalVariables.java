@@ -27,8 +27,7 @@ public class GlobalVariables {
     public static final int[] EDIT_RESULT_GROUP_WINDOW_SIZES = new int[] {350, 250};
     // Edit result window
     public static final String EDIT_RESULT_WINDOW_TITLE = "Редактировать результат";
-    public static final int[] EDIT_RESULT_WINDOW_SIZES = new int[] {350, 400};
-    // Alert window
+    public static final int[] EDIT_RESULT_WINDOW_SIZES = new int[] {350, 450};    // Alert window
     public static final String ALERT_WINDOW_TITLE = "Внимание!";
     public static final int[] ALERT_WINDOW_SIZES = new int[] {400, 150};
 

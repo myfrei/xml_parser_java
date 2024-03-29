@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import ru.white.xml_parser_java.model.LimitComparator;
 import ru.white.xml_parser_java.model.RoundingOptionals;
 import ru.white.xml_parser_java.model.TestResult;
+import ru.white.xml_parser_java.model.UnitOption;
 import ru.white.xml_parser_java.util.GlobalStates;
 import ru.white.xml_parser_java.util.GlobalVariables;
 import ru.white.xml_parser_java.util.JsonNodeManager;
@@ -25,6 +26,8 @@ public class TestResultService {
                 testResult.setName(StringManager.removeQuotes(String.valueOf(testResultNode.get("name"))));
                 testResult.setStatus(JsonNodeManager.getStatus(testResultNode));
                 testResult.setValue(getValue(testResultNode));
+                testResult.setUnitValue(testResult.getValue());
+                testResult.setUnitOption(UnitOption.NONE);
                 // Получает сначала двойной лимит значений потом, если он не определён пробует получить одиночный.
                 String limits = getLimits(testResultNode);
                 if (limits.equals(GlobalVariables.VALID_VALUES_UNDEFINED)) {
@@ -36,32 +39,10 @@ public class TestResultService {
         }
         return result;
     }
-
     // Возвращает значение результата теста, округлённое согласно глобальному состоянию 'roundingOptional'
     private String getValue(JsonNode testResultNode) {
         String stringValue = StringManager.removeQuotes(String.valueOf(testResultNode.get("TestData").get("Datum").get("value")));
-        if (!GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {
-            try {
-                double numValue = Double.parseDouble(stringValue);
-                BigDecimal bigDecimal = new BigDecimal(numValue);
-                switch (GlobalStates.getRoundingOptional()) {
-                    case TWO_UP:
-                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_UP));
-                    case TWO_DOWN:
-                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_DOWN));
-                    case THREE_UP:
-                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_UP));
-                    case THREE_DOWN:
-                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_DOWN));
-                    default:
-                        return stringValue;
-                }
-            } catch (Exception ex) {
-                return stringValue;
-            }
-        } else {
-            return stringValue;
-        }
+        return GlobalStates.getRoundedValue(stringValue);
     }
 
     // Возвращает диапазон допустимых значений результата теста, если он указан.

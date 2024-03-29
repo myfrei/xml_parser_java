@@ -76,7 +76,7 @@ public class PdfExportService {
                 resultGroup.getResults().forEach(res -> {
                     if (res.isSelected()) {
                         result.addCell(getCell(resultGroup.getName(), false, false));
-                        result.addCell(getCell(res.getValue().isBlank() ? "-" : res.getValue(), true, false));
+                        result.addCell(getCell(res.getUnitValue().isBlank() ? "-" : res.getValue(), true, false));
                         result.addCell(getCell(res.getValidValues().equals(GlobalVariables.VALID_VALUES_UNDEFINED) ? "-" : res.getValidValues(), true, false));
                         result.addCell(getCell(resultGroup.getStatus(), true, false));
                     }

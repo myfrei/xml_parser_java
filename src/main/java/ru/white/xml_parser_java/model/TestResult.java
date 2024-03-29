@@ -4,6 +4,8 @@ public class TestResult {
     private String name;
     private String status;
     private String value;
+    private String unitValue;
+    private UnitOption unitOption;
     private String validValues;
     private boolean selected;
 
@@ -33,6 +35,22 @@ public class TestResult {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getUnitValue() {
+        return unitValue;
+    }
+
+    public void setUnitValue(String unitValue) {
+        this.unitValue = unitValue;
+    }
+
+    public UnitOption getUnitOption() {
+        return unitOption;
+    }
+
+    public void setUnitOption(UnitOption unitOption) {
+        this.unitOption = unitOption;
     }
 
     public String getValidValues() {

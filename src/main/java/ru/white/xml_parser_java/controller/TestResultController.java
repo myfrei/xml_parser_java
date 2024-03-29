@@ -249,7 +249,7 @@ public class TestResultController {
     // Возвращает элемент разбитый на ячейки для заполнения строки в таблице (перегрузка для результата).
     private HBox getGraphic(TestResult result) {
         HBox hBox = getBaseGraphic(result.getName(), result.getStatus(), false);
-        Label valueLabel = new Label(result.getValue());
+        Label valueLabel = new Label(result.getUnitValue());
         valueLabel.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         valueLabel.setAlignment(Pos.CENTER);
         tableCells.put(valueLabel, false);
