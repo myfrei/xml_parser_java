@@ -246,6 +246,7 @@ public class TestResultController {
         tableCells.put(statusLabel, false);
         hBox.getChildren().add(statusLabel);
 
+        statusLabel.setPrefWidth((testResultWindow.getWidth() / 2) - 20);
         return hBox;
     }
 

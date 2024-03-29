@@ -1,6 +1,7 @@
 package ru.white.xml_parser_java.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.white.xml_parser_java.model.LimitComparator;
 import ru.white.xml_parser_java.model.RoundingOptionals;
 import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.util.GlobalStates;
@@ -11,6 +12,7 @@ import ru.white.xml_parser_java.util.StringManager;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TestResultService {
     // Возвращает список результатов тестов.
@@ -23,7 +25,12 @@ public class TestResultService {
                 testResult.setName(StringManager.removeQuotes(String.valueOf(testResultNode.get("name"))));
                 testResult.setStatus(JsonNodeManager.getStatus(testResultNode));
                 testResult.setValue(getValue(testResultNode));
-                testResult.setValidValues(getLimits(testResultNode));
+                // Получает сначала двойной лимит значений потом, если он не определён пробует получить одиночный.
+                String limits = getLimits(testResultNode);
+                if (limits.equals(GlobalVariables.VALID_VALUES_UNDEFINED)) {
+                    limits = getSingleLimit(testResultNode);
+                }
+                testResult.setValidValues(limits);
                 result.add(testResult);
             }
         }
@@ -66,6 +73,25 @@ public class TestResultService {
                 limitItems.add(StringManager.removeQuotes(String.valueOf(limitItem.get("Datum").get("value"))));
             }
             return limitItems.get(0) + " - " + limitItems.get(1);
+        } catch (Exception ex) {
+            return GlobalVariables.VALID_VALUES_UNDEFINED;
+        }
+    }
+
+
+    // Возвращает одиночный предел результата теста если он указан.
+    private String getSingleLimit(JsonNode testResultNode) {
+        try {
+            JsonNode limitsNode = testResultNode.get("TestLimits").get("Limits").get("SingleLimit");
+            Optional<LimitComparator> optComparator = LimitComparator.getByStringValue(String.valueOf(limitsNode.get("comparator")));
+            String viewComparator;
+            if (optComparator.isPresent()) {
+                viewComparator = optComparator.get().getViewValue();
+            } else {
+                viewComparator = "";
+            }
+            return viewComparator + " " + StringManager.removeQuotes(String.valueOf(limitsNode.get("Datum").get("value")));
+
         } catch (Exception ex) {
             return GlobalVariables.VALID_VALUES_UNDEFINED;
         }
