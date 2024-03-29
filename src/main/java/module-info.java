@@ -6,6 +6,7 @@ module ru.white.xml_parser_java {
     requires com.fasterxml.jackson.dataformat.xml;
     requires java.datatransfer;
     requires java.desktop;
+    requires javafx.swing;
 
     opens ru.white.xml_parser_java to javafx.fxml;
     opens ru.white.xml_parser_java.controller to javafx.fxml;

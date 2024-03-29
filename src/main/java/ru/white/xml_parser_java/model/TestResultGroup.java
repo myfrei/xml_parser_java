@@ -1,10 +1,13 @@
 package ru.white.xml_parser_java.model;
 
+import javafx.scene.Scene;
+
 import java.util.List;
 
 public class TestResultGroup {
     private String name;
     private String status;
+    private Scene graph;
     private List<TestResult> results;
     private boolean selected;
     private boolean empty;
@@ -23,6 +26,14 @@ public class TestResultGroup {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Scene getGraph() {
+        return graph;
+    }
+
+    public void setGraph(Scene graph) {
+        this.graph = graph;
     }
 
     public List<TestResult> getResults() {

@@ -30,6 +30,11 @@ public class GlobalVariables {
     public static final int[] EDIT_RESULT_WINDOW_SIZES = new int[] {350, 450};    // Alert window
     public static final String ALERT_WINDOW_TITLE = "Внимание!";
     public static final int[] ALERT_WINDOW_SIZES = new int[] {400, 150};
+    // Graph
+    public static final String GRAPH_NODE_NAME = "DecimGraph";
+    public static final int[] GRAPH_WINDOW_SIZES = new int[] {500, 300}; // размер графика в PDF (органичен шириной листа A4);
+    public static final int GRAPH_WIN_SIZE_COEFFICIENT = 2; // насколько больше размер окна с граффиком в программе, по отношению к PDF.
+    public static final String SHOW_GRAPH_BUTTON_TEXT = "Смотреть график";
 
     // PDF
     public static String getPdfFileName (LocalDate date) { return "Результаты тестов от " + getDate(date) + ".pdf"; }

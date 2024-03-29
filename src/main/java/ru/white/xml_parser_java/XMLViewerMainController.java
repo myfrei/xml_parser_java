@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -15,7 +16,6 @@ import ru.white.xml_parser_java.controller.InstructionController;
 import ru.white.xml_parser_java.controller.TestResultController;
 import ru.white.xml_parser_java.model.FileData;
 import ru.white.xml_parser_java.model.RoundingOptionals;
-import ru.white.xml_parser_java.model.TestGroup;
 import ru.white.xml_parser_java.service.FileService;
 import ru.white.xml_parser_java.util.AlertService;
 import ru.white.xml_parser_java.util.GlobalStates;
@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class XMLViewerMainController {
+public class XMLViewerMainController extends Parent {
     private FileService fileService;
     private DirectoryChooser directoryChooser;
     private List<File> currentDirectoryFiles;

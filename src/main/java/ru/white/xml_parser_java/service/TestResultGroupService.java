@@ -32,6 +32,11 @@ public class TestResultGroupService {
                     // Получение результатов и присвоение их группе.
                     TestResultService testResultService = new TestResultService();
                     testResultGroup.setResults(testResultService.getTestResults(testResultGroupNode));
+                    // Проверяет есть ли у группы результатов график. Строит и присваивает его если он есть.
+                    if (testResultGroup.getName().equals(GlobalVariables.GRAPH_NODE_NAME)) {
+                        GraphService graphService = new GraphService();
+                        testResultGroup.setGraph(graphService.getGraph());
+                    }
                     // Добавление группы результатов в результирующий список.
                     result.add(testResultGroup);
                 }

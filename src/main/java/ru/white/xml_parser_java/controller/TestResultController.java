@@ -231,7 +231,15 @@ public class TestResultController {
         tableCells.put(emptyLabel1, false);
         hBox.getChildren().add(emptyLabel1);
         // Вставляет пустую ячейку в столбец 'Valid Values'
+        // или, если у группы результатов есть график располагает в ячейке кнопку 'Смотреть график'
         Label emptyLabel2 = new Label();
+        if (resultGroup.getGraph() != null) {
+            Button graphButton = new Button(GlobalVariables.SHOW_GRAPH_BUTTON_TEXT);
+            emptyLabel2.setGraphic(graphButton);
+            graphButton.setOnAction(event -> {
+                showGraph(resultGroup);
+            });
+        }
         emptyLabel2.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         tableCells.put(emptyLabel2, false);
         hBox.getChildren().add(emptyLabel2);
@@ -336,5 +344,15 @@ public class TestResultController {
         exportAllPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
         generalCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
         generalCheckBox.setLayoutX(testResultWindow.getWidth() - 170);
+    }
+
+    // Открывает окно с графиком.
+    private void showGraph(TestResultGroup resultGroup) {
+        Stage stage = new Stage();
+        stage.setTitle(resultGroup.getName());
+        stage.setScene(resultGroup.getGraph());
+        stage.setWidth(resultGroup.getGraph().getWidth() * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
+        stage.setHeight(resultGroup.getGraph().getHeight() * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
+        stage.show();
     }
 }

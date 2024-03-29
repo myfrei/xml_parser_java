@@ -26,6 +26,17 @@
             <version>21.0.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>21.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>16</version>
+        </dependency>
+
         <!-- работа с XML файлами -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
