@@ -123,7 +123,7 @@ public class EditResultController {
 
         if (GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {
             int maxAfterPointChars;
-            if (comboBox.getValue().equals(UnitOption.MACRO)) {
+            if (comboBox.getValue().equals(UnitOption.MICRO)) {
                 maxAfterPointChars = valueInput.getText().split("\\.")[0].length() + 6;
             } else if (comboBox.getValue().equals(UnitOption.MILLI)) {
                 maxAfterPointChars = valueInput.getText().split("\\.")[0].length() + 3;

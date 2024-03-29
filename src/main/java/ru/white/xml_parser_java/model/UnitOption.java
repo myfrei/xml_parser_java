@@ -2,7 +2,7 @@ package ru.white.xml_parser_java.model;
 
 public enum UnitOption {
     NONE(1),
-    MACRO(0.000001),
+    MICRO(0.000001),
     MILLI(0.001),
     KILO(1000),
     MEGA(1000000);
