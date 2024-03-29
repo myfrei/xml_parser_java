@@ -6,6 +6,7 @@ public class TestResultGroup {
     private String name;
     private String status;
     private List<TestResult> results;
+    private boolean selected;
 
     public String getName() {
         return name;
@@ -29,5 +30,11 @@ public class TestResultGroup {
 
     public void setResults(List<TestResult> results) {
         this.results = results;
+    }
+    public boolean isSelected() {
+        return selected;
+    }
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

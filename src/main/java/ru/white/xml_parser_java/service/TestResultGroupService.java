@@ -27,6 +27,8 @@ public class TestResultGroupService {
                     }
                     // Присвоение статуса группе результатов.
                     testResultGroup.setStatus(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode)));
+                    // Флаг 'selected' устанавливается в активное положение. (чекбокс в табице выбран)
+                    testResultGroup.setSelected(true);
                     // Получение результатов и присвоение их группе.
                     TestResultService testResultService = new TestResultService();
                     testResultGroup.setResults(testResultService.getTestResults(testResultGroupNode));

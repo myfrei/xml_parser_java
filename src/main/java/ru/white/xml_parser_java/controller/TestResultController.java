@@ -180,7 +180,7 @@ public class TestResultController {
             if (accordion.getPanes().size() > 0) accordion.getPanes().removeAll(accordion.getPanes());
             for (TestResultGroup rg : testGroups.get(testGroupIndex).getTests().get(testIndex).getResultGroups()) {
                 TitledPane titledPane = new TitledPane();
-                HBox hBox = getGraphic(rg.getName(), rg.getStatus(), rg.getResults().size() > 0);
+                HBox hBox = getGraphic(rg);
                 hBox.setOnMouseClicked((mouseEvent) -> {
                     if (mouseEvent.getClickCount() == 2) {
                         openEditResultGroupWindow(rg, hBox);
@@ -229,8 +229,8 @@ public class TestResultController {
         table.getColumns().add(validValuesColumn);
     }
 
-    // Возвращает элемент разбитый на ячейки для заполнения строки в таблице (перегрузка для группы результатов).
-    private HBox getGraphic(String name, String status, boolean hasChildren) {
+    // Базовый метод возвращающий строку таблицы
+    private HBox getBaseGraphic(String name, String status, boolean hasChildren) {
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -246,13 +246,42 @@ public class TestResultController {
         tableCells.put(statusLabel, false);
         hBox.getChildren().add(statusLabel);
 
-        statusLabel.setPrefWidth((testResultWindow.getWidth() / 2) - 20);
+        return hBox;
+    }
+
+    // Возвращает элемент разбитый на ячейки для заполнения строки в таблице (перегрузка для группы результатов).
+    private HBox getGraphic(TestResultGroup resultGroup) {
+        HBox hBox = getBaseGraphic(resultGroup.getName(), resultGroup.getStatus(), resultGroup.getResults().size() > 0);
+
+        // Вставляет пустую ячейку в столбец 'Value'
+        Label emptyLabel1 = new Label();
+        emptyLabel1.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
+        tableCells.put(emptyLabel1, false);
+        hBox.getChildren().add(emptyLabel1);
+
+        // Вставляет пустую ячейку в столбец 'Valid Values'
+        Label emptyLabel2 = new Label();
+        emptyLabel2.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
+        tableCells.put(emptyLabel2, false);
+        hBox.getChildren().add(emptyLabel2);
+
+        CheckBox checkBox = new CheckBox();
+        checkBox.setPrefWidth(20);
+        checkBox.setSelected(resultGroup.isSelected());
+        hBox.getChildren().add(checkBox);
+
+        checkBox.setOnAction(actionEvent -> {
+            resultGroup.setSelected(checkBox.isSelected());
+            resultGroup.getResults().forEach(res -> res.setSelected(checkBox.isSelected()));
+            updateTable(tabIndexes[0], tabIndexes[1]);
+        });
+
         return hBox;
     }
 
     // Возвращает элемент разбитый на ячейки для заполнения строки в таблице (перегрузка для результата).
     private HBox getGraphic(TestResult result) {
-        HBox hBox = getGraphic(result.getName(), result.getStatus(), false);
+        HBox hBox = getBaseGraphic(result.getName(), result.getStatus(), false);
 
         Label valueLabel = new Label(result.getValue());
         valueLabel.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
