@@ -110,6 +110,7 @@ public class TestResultController {
             testGroups.forEach(tg -> {
                 tg.getTests().forEach(t -> {
                     t.getResultGroups().forEach(rg -> {
+                        rg.setSelected(generalCheckBox.isSelected());
                         rg.getResults().forEach(r -> {
                             r.setSelected(generalCheckBox.isSelected());
                         });

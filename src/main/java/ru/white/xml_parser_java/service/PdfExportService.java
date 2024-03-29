@@ -7,6 +7,7 @@ import com.lowagie.text.alignment.VerticalAlignment;
 import com.lowagie.text.pdf.PdfWriter;
 import ru.white.xml_parser_java.model.TestGroup;
 import ru.white.xml_parser_java.model.Test;
+import ru.white.xml_parser_java.model.TestResultGroup;
 import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.util.GlobalVariables;
 
@@ -41,12 +42,14 @@ public class PdfExportService {
                     document.add(testName);
                     document.add(new Paragraph("\n"));
                     tg.getTests().forEach(t -> {
-                        Font tableTitleFont = new Font(null, 10, Font.NORMAL);
-                        Paragraph tableTitle = new Paragraph();
-                        tableTitle.add(new Chunk(GlobalVariables.getTableName(testName.getChunks().get(0).toString(), tg.getTests().indexOf(t) + 1, t.getName()), tableTitleFont));
-                        document.add(tableTitle);
-                        document.add(getTable(t));
-                        document.add(new Paragraph("\n\n"));
+                        if (t.getResultGroups().stream().anyMatch(TestResultGroup::isSelected)) {
+                            Font tableTitleFont = new Font(null, 10, Font.NORMAL);
+                            Paragraph tableTitle = new Paragraph();
+                            tableTitle.add(new Chunk(GlobalVariables.getTableName(testName.getChunks().get(0).toString(), tg.getTests().indexOf(t) + 1, t.getName()), tableTitleFont));
+                            document.add(tableTitle);
+                            document.add(getTable(t));
+                            document.add(new Paragraph("\n\n"));
+                        }
                     });
                 }
             });
@@ -77,7 +80,7 @@ public class PdfExportService {
                         result.addCell(getCell(resultGroup.getStatus(), true, false));
                     }
                 });
-            } else {
+            } else if (resultGroup.isSelected()) {
                 result.addCell(getCell(resultGroup.getName(), false, false));
                 result.addCell(getCell("-", true, false));
                 result.addCell(getCell("-", true, false));
