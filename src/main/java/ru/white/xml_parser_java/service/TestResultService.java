@@ -42,7 +42,33 @@ public class TestResultService {
     // Возвращает значение результата теста, округлённое согласно глобальному состоянию 'roundingOptional'
     private String getValue(JsonNode testResultNode) {
         String stringValue = StringManager.removeQuotes(String.valueOf(testResultNode.get("TestData").get("Datum").get("value")));
-        return GlobalStates.getRoundedValue(stringValue);
+        return getRoundedValue(stringValue);
+    }
+
+    // Парсит строку, округляет согласно глобальному состоянию 'roundingOptional' и возвращает значение.
+    private String getRoundedValue(String value) {
+        if (!GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {
+            try {
+                double doubleValue = Double.parseDouble(value);
+                BigDecimal bigDecimal = new BigDecimal(doubleValue);
+                switch (GlobalStates.getRoundingOptional()) {
+                    case TWO_UP:
+                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_UP));
+                    case TWO_DOWN:
+                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_DOWN));
+                    case THREE_UP:
+                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_UP));
+                    case THREE_DOWN:
+                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_DOWN));
+                    default:
+                        return String.valueOf(doubleValue);
+                }
+            } catch (Exception ex) {
+                return value;
+            }
+        } else {
+            return value;
+        }
     }
 
     // Возвращает диапазон допустимых значений результата теста, если он указан.

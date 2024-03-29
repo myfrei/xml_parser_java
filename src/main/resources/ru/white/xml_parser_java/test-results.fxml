@@ -2,21 +2,16 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.Pane?>
-<Pane fx:id="testResultWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-      prefHeight="500.0" prefWidth="900.0" style="-fx-background-color: #fff1d8;" xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1">
-    <TabPane fx:id="testGroupsPane" prefHeight="28.0" prefWidth="900" style="-fx-background-color: #fff1d8;"
-             tabClosingPolicy="UNAVAILABLE">
+
+<Pane fx:id="testResultWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="900.0" style="-fx-background-color: #E2E6E9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <TabPane fx:id="testGroupsPane" prefHeight="28.0" prefWidth="900" style="-fx-background-color: white;" tabClosingPolicy="UNAVAILABLE">
     </TabPane>
-    <TabPane fx:id="testsPane" layoutY="28.0" prefHeight="28.0" prefWidth="900" style="-fx-background-color: #fff1d8;"
-             tabClosingPolicy="UNAVAILABLE">
+    <TabPane fx:id="testsPane" layoutY="28.0" prefHeight="28.0" prefWidth="900" style="-fx-background-color: white;" tabClosingPolicy="UNAVAILABLE">
     </TabPane>
-    <TableView fx:id="table" layoutY="56.0" prefHeight="44.0" prefWidth="900.0"/>
-    <Accordion fx:id="accordion" layoutY="80.0" prefHeight="380.0" style="-fx-background-color: #fff1d8;"/>
-    <Button fx:id="exportSelectedTestPDFButton" layoutX="5.0" layoutY="470.0" mnemonicParsing="false"
-            text="Экспорт выбранного теста в PDF"/>
-    <Button fx:id="exportAllPDFButton" layoutX="216.0" layoutY="470.0" mnemonicParsing="false"
-            text="Экспорт всех тестов в PDF"/>
-    <CheckBox fx:id="generalCheckBox" layoutX="730.0" layoutY="475.0" mnemonicParsing="false"
-              nodeOrientation="RIGHT_TO_LEFT" text="Выделить все результаты"/>
+    <TableView fx:id="table" layoutY="56.0" prefHeight="44.0" prefWidth="900.0" />
+    <Accordion fx:id="accordion" layoutY="80.0" prefHeight="380.0" style="-fx-background-color: white;" />
+    <Button fx:id="exportSelectedTestPDFButton" layoutX="5.0" layoutY="470.0" mnemonicParsing="false" text="Экспорт выбранного теста в PDF" />
+    <Button fx:id="exportAllPDFButton" layoutX="216.0" layoutY="470.0" mnemonicParsing="false" text="Экспорт всех тестов в PDF" />
+    <CheckBox fx:id="generalCheckBox" layoutX="730.0" layoutY="475.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" text="Выделить все результаты" />
+    <CheckBox fx:id="includeGraphCheckBox" layoutX="391.0" layoutY="475.0" mnemonicParsing="false" text="Включить графики в PDF" />
 </Pane>

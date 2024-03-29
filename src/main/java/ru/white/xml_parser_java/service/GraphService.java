@@ -13,7 +13,7 @@ import java.util.List;
 
 public class GraphService {
     // Возвращает сцену с графиком построенным по переданному узлу или null если график построить не удалось.
-    public Scene getGraph(JsonNode testResultGroupNode) {
+    public LineChart<Number, Number> getGraph(JsonNode testResultGroupNode) {
         try {
             // Ищет узел содержащий график
             JsonNode itemNode = testResultGroupNode.get("Data").get("Collection").get("Item");
@@ -64,7 +64,7 @@ public class GraphService {
     }
 
     // Возвращает сцену с построенным графиком.
-    private Scene getGraph(double step, List<Double> points) {
+    private LineChart<Number, Number> getGraph(double step, List<Double> points) {
         // Создаёт оси X и Y
         final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
@@ -84,8 +84,6 @@ public class GraphService {
         lineChart.setLegendVisible(false); // Выключает подсказки по цвету внизу графика, т.к. линия всего одна.
         // Добавляет линию в график
         lineChart.getData().add(series);
-        // Создаёт и возвращает сцену с этой линией.
-        Scene scene = new Scene(lineChart, GlobalVariables.GRAPH_WINDOW_SIZES[0], GlobalVariables.GRAPH_WINDOW_SIZES[1]);
-        return scene;
+        return lineChart;
     }
 }

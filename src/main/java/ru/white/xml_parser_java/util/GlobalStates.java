@@ -32,30 +32,15 @@ public class GlobalStates {
         GlobalStates.roundingOptional = roundingOptional;
     }
 
-    // Парсит строку и округляет согласно состоянию 'roundingOptional' и возвращает значение.
-    public static String getRoundedValue(String value) {
-        if (!roundingOptional.equals(RoundingOptionals.NO_ROUND)) {
-            try {
-                double doubleValue = Double.parseDouble(value);
-                BigDecimal bigDecimal = new BigDecimal(doubleValue);
-                switch (roundingOptional) {
-                    case TWO_UP:
-                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_UP));
-                    case TWO_DOWN:
-                        return String.valueOf(bigDecimal.setScale(2, BigDecimal.ROUND_DOWN));
-                    case THREE_UP:
-                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_UP));
-                    case THREE_DOWN:
-                        return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_DOWN));
-                    default:
-                        return String.valueOf(doubleValue);
-                }
-            } catch (Exception ex) {
-                return value;
-            }
-        } else {
-            return value;
-        }
+    // Включать графики в PDF или нет.
+    private static boolean includeGraphToPdf = true; // по умолчанию графики включаются.
+
+    public static boolean isIncludeGraphToPdf() {
+        return includeGraphToPdf;
+    }
+
+    public static void setIncludeGraphToPdf(boolean includeGraphToPdf) {
+        GlobalStates.includeGraphToPdf = includeGraphToPdf;
     }
 }
 

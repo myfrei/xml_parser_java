@@ -43,6 +43,7 @@ public class GlobalVariables {
     // PDF
     public static String getPdfFileName (LocalDate date) { return "Результаты тестов от " + getDate(date) + ".pdf"; }
     public static String getPdfTitleDate (LocalDate date) { return "Тест проведён " + getDate(date); }
+    public static String getGraphPdfTitle (int tableNumber) { return "Осцилограмма к таблице № " + tableNumber; }
     public static final String PDF_TITLE = "Результаты тестов.\n";
     public static String getTableName(String testName, int number, String name) {return testName + " - Таблица № " + number + " - " + name;}
     public static final String TREE_VIEW_COLUMN_NAME = "";
@@ -51,6 +52,7 @@ public class GlobalVariables {
     public static final String STATUS_COLUMN_NAME = "Статус";
     public static final String PDF_CREATED_MESSAGE = "Файл успешно сохранён";
     public static final String EMPTY_TEST_GROUPS_MESSAGE = "Выбранные тесты не содержат результатов для формирования PDF";
+    public static final String INCORRECT_GRAPH_MESSAGE = "Экспорт в PDF остановлен, не удалось вставить график.";
 
     private static String getDate(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -82,6 +84,7 @@ public class GlobalVariables {
             "У некоторых групп таких значений нет, а есть только имя и статус, такие строки нельзя развернуть.\n" +
             "Строки с результатами (после разворачивания) имеют справа чекбокс по которому они попадают или не попадают в экспорт, по умолчанию все выбраны \n" +
             "Для редактирования результата необходимо дважды на него нажать.\n" +
-            "- в нижней части окна просмотра результатов расположены кнопки экспорта в PDF. Можно экспортировать как один выбранный тест, так и все сразу.\n";
+            "- в нижней части окна просмотра результатов расположены кнопки экспорта в PDF. Можно экспортировать как один выбранный тест, так и все сразу.\n" +
+            "- рядом расположен чекбокс позволяющий добавлять или не добавлять графики в PDF файл.\n" +
+            "- результаты содержащие графики имеют кнопку \"Смотреть график\" прямо на строке в таблице.";
 }
-

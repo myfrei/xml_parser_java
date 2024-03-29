@@ -16,6 +16,7 @@ import ru.white.xml_parser_java.XMLViewerApplication;
 import ru.white.xml_parser_java.model.*;
 import ru.white.xml_parser_java.service.PdfExportService;
 import ru.white.xml_parser_java.util.AlertService;
+import ru.white.xml_parser_java.util.GlobalStates;
 import ru.white.xml_parser_java.util.GlobalVariables;
 
 import java.io.File;
@@ -28,11 +29,9 @@ import java.util.Map;
 
 public class TestResultController {
     private final FileData fileData;
-
     public TestResultController(FileData fileData) {
         this.fileData = fileData;
     }
-
     // Хранит идексы выбранных в настоящий момент вкладок.
     private final int[] tabIndexes = new int[2];
     // Хранит все столбцы таблицы для быстрого доступа к ним с целью изменения размера.
@@ -55,6 +54,10 @@ public class TestResultController {
     private Button exportSelectedTestPDFButton;
     @FXML
     private Button exportAllPDFButton;
+
+    @FXML
+    private CheckBox includeGraphCheckBox;
+
     @FXML
     public void initialize() {
         // Заполняет таблицу колонками
@@ -64,21 +67,26 @@ public class TestResultController {
         tabIndexes[1] = 0;
         // Делает "выбранным" главный чек бокс (Выбрать всё)
         generalCheckBox.setSelected(true);
-
         // Заполняет вкладки первого уровня (группы тестов)
         fileData.getTestGroups().forEach(tg -> {
             Tab tab = new Tab(tg.getName());
             testGroupsPane.getTabs().add(tab);
         });
-
         // Заполняет вкладки второго уровня (тесты)
         fileData.getTestGroups().get(0).getTests().forEach(t -> {
             Tab tab = new Tab(t.getName());
             testsPane.getTabs().add(tab);
         });
-
         // Заполняет таблицу данными из первого теста первой группы тестов (если такой тест есть)
         if (fileData.getTestGroups().get(0).getTests().size() > 0) updateTable(tabIndexes[0], tabIndexes[1]);
+
+        // Устанавливает в положение 'true' глобальное состояние отвечающее за включение графиков в PDF и соответствующий чекбокс тоже.
+        GlobalStates.setIncludeGraphToPdf(true);
+        includeGraphCheckBox.setSelected(GlobalStates.isIncludeGraphToPdf());
+        // Слушает чекбокс включения/изсключения графиков в PDF и по изменению изменяет глобальное состояние.
+        includeGraphCheckBox.setOnAction(event -> {
+            GlobalStates.setIncludeGraphToPdf(includeGraphCheckBox.isSelected());
+        });
 
         // При выборе группы тестов заполняет вкладки второго уровня (тесты)
         testGroupsPane.getSelectionModel().selectedItemProperty().addListener(observable -> {
@@ -91,7 +99,6 @@ public class TestResultController {
             tabIndexes[1] = testsPane.getSelectionModel().getSelectedIndex();
             updateTable(tabIndexes[0], tabIndexes[1]);
         });
-
         // Слушает главный чек бокс и по его изменению присваивает всем результатам тестов его статус (выбран/не выбран)
         generalCheckBox.setOnAction(actionEvent -> {
             fileData.getTestGroups().forEach(tg -> {
@@ -106,7 +113,6 @@ public class TestResultController {
             });
             updateTable(tabIndexes[0], tabIndexes[1]);
         });
-
         // По нажатию кнопки 'exportSelectedTestPDFButton' экспортирует выбранный тест в PDF
         exportSelectedTestPDFButton.setOnAction(actionEvent -> {
             if (checkTestGroupListForPDF(List.of(fileData.getTestGroups().get(tabIndexes[0])))) {
@@ -123,7 +129,6 @@ public class TestResultController {
                 AlertService.openAlertWindow(GlobalVariables.EMPTY_TEST_GROUPS_MESSAGE);
             }
         });
-
         // По нажатию кнопки 'exportAllPDFButton' экспортирует все тесты в PDF
         exportAllPDFButton.setOnAction(actionEvent -> {
             if (checkTestGroupListForPDF(fileData.getTestGroups())) {
@@ -322,6 +327,16 @@ public class TestResultController {
         }
         return false;
     }
+    // Открывает окно с графиком.
+    private void showGraph(TestResultGroup resultGroup) {
+        Stage stage = new Stage();
+        stage.setTitle(resultGroup.getName());
+        stage.setScene(new Scene(resultGroup.getGraph()
+                , GlobalVariables.GRAPH_WINDOW_SIZES[0] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT
+                , GlobalVariables.GRAPH_WINDOW_SIZES[1] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT));
+        stage.show();
+    }
+
     // Изменяет размеры внутренних элементов при изменении размера главного окна.
     private void changeSize() {
         testGroupsPane.setPrefWidth(testResultWindow.getWidth());
@@ -344,15 +359,5 @@ public class TestResultController {
         exportAllPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
         generalCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
         generalCheckBox.setLayoutX(testResultWindow.getWidth() - 170);
-    }
-
-    // Открывает окно с графиком.
-    private void showGraph(TestResultGroup resultGroup) {
-        Stage stage = new Stage();
-        stage.setTitle(resultGroup.getName());
-        stage.setScene(resultGroup.getGraph());
-        stage.setWidth(GlobalVariables.GRAPH_WINDOW_SIZES[0] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
-        stage.setHeight(GlobalVariables.GRAPH_WINDOW_SIZES[1] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
-        stage.show();
     }
 }
