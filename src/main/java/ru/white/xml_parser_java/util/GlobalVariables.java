@@ -31,7 +31,11 @@ public class GlobalVariables {
     public static final String ALERT_WINDOW_TITLE = "Внимание!";
     public static final int[] ALERT_WINDOW_SIZES = new int[] {400, 150};
     // Graph
+    public static final String GRAPH_TITLE = "Осцилограмма измерения линий";
+    public static final String GRAPH_Y_LABEL = "Напряжение, В";
+    public static final String GRAPH_X_LABEL = "Время, с";
     public static final String GRAPH_NODE_NAME = "DecimGraph";
+    public static final String GRAPH_ITEM_NODE_NAME = "Result Waveform [Out]"; // имя узла Item для проверки (может быть только таким).
     public static final int[] GRAPH_WINDOW_SIZES = new int[] {500, 300}; // размер графика в PDF (органичен шириной листа A4);
     public static final int GRAPH_WIN_SIZE_COEFFICIENT = 2; // насколько больше размер окна с граффиком в программе, по отношению к PDF.
     public static final String SHOW_GRAPH_BUTTON_TEXT = "Смотреть график";

@@ -351,8 +351,8 @@ public class TestResultController {
         Stage stage = new Stage();
         stage.setTitle(resultGroup.getName());
         stage.setScene(resultGroup.getGraph());
-        stage.setWidth(resultGroup.getGraph().getWidth() * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
-        stage.setHeight(resultGroup.getGraph().getHeight() * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
+        stage.setWidth(GlobalVariables.GRAPH_WINDOW_SIZES[0] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
+        stage.setHeight(GlobalVariables.GRAPH_WINDOW_SIZES[1] * GlobalVariables.GRAPH_WIN_SIZE_COEFFICIENT);
         stage.show();
     }
 }

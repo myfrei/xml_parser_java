@@ -35,8 +35,7 @@ public class TestResultGroupService {
                     // Проверяет есть ли у группы результатов график. Строит и присваивает его если он есть.
                     if (testResultGroup.getName().equals(GlobalVariables.GRAPH_NODE_NAME)) {
                         GraphService graphService = new GraphService();
-                        testResultGroup.setGraph(graphService.getGraph());
-                    }
+                        testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));                    }
                     // Добавление группы результатов в результирующий список.
                     result.add(testResultGroup);
                 }
