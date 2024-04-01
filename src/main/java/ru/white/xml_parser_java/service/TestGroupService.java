@@ -51,7 +51,7 @@ public class TestGroupService {
                         }
                     }
                 });
-                result.setTests(mergeEmptyTests(tests));
+                result.setTests(tests);
                 return Optional.of(result);
             } else {
                 return Optional.empty();
@@ -63,10 +63,28 @@ public class TestGroupService {
 
     // Проверяет статус групп тестов.
     private boolean checkTestGroupOutcomeStatus(JsonNode testGroupNode) {
-        String outcomeStatus = String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", "");
+        JsonNode outcomeOrActionOutcome = getOutcomeOrActionOutcome(testGroupNode);
+        if (outcomeOrActionOutcome == null) {
+            return false;
+        }
+        String outcomeStatus = String.valueOf(outcomeOrActionOutcome
+                .get("value")).replaceAll("\"", "");
         return outcomeStatus.equals("Passed")
                 || outcomeStatus.equals("Failed")
+                || outcomeStatus.equals("Done")
                 || (GlobalStates.isUserDefined() && outcomeStatus.equals("UserDefined"));
+    }
+
+    private JsonNode getOutcomeOrActionOutcome(JsonNode testGroupNode) {
+        JsonNode outcome = testGroupNode.get("Outcome");
+        if (outcome != null) {
+            return outcome;
+        }
+        JsonNode outcome1 = testGroupNode.get("ActionOutcome");
+        if (outcome1 != null) {
+            return outcome1;
+        }
+        return null;
     }
 
     // Возвращает 'true' если группа тестов содержит только пустые результаты.

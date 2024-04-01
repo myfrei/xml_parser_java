@@ -358,6 +358,8 @@ public class TestResultController {
         exportSelectedTestPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
         exportAllPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
         generalCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
-        generalCheckBox.setLayoutX(testResultWindow.getWidth() - 170);
+        generalCheckBox.setLayoutX(testResultWindow.getWidth() - 220);
+        includeGraphCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
+        includeGraphCheckBox.setLayoutX(testResultWindow.getWidth() - 450);
     }
 }
