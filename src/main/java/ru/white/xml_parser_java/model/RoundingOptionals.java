@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum RoundingOptionals {
-    NO_ROUND ("No rounding"),
-    TWO_UP ("Up to 2 characters upward"),
-    TWO_DOWN ("Up to 2 decimal places"),
-    THREE_UP ("Up to 3 characters upward"),
-    THREE_DOWN ("Up to 3 decimal places");
+    NO_ROUND ("Без округления"),
+    TWO_UP ("До 2ух знаков в большую сторону"),
+    TWO_DOWN ("До 2ух знаков в меньшую сторону"),
+    THREE_UP ("До 3ох знаков в большую сторону"),
+    THREE_DOWN ("До 3ох знаков в меньшую сторону");
 
     private final String title;
 

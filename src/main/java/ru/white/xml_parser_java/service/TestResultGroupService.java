@@ -5,6 +5,7 @@ import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.model.TestResultGroup;
 import ru.white.xml_parser_java.util.GlobalVariables;
 import ru.white.xml_parser_java.util.JsonNodeManager;
+import ru.white.xml_parser_java.util.StatusType;
 import ru.white.xml_parser_java.util.StringManager;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class TestResultGroupService {
                         testResultGroup.setName(StringManager.removeQuotes(String.valueOf(testResultGroupNode.get("name"))));
                     }
                     // Присвоение статуса группе результатов.
-                    testResultGroup.setStatus(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode)));
+                    testResultGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation());
                     // Флаг 'selected' устанавливается в активное положение. (чекбокс в табице выбран)
                     testResultGroup.setSelected(true);
                     // Получение результатов и присвоение их группе.

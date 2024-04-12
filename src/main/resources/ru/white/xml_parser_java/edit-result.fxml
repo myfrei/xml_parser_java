@@ -12,10 +12,10 @@
     <TextField fx:id="statusInput" layoutX="25.0" layoutY="120.0" prefHeight="25.0" prefWidth="300.0" />
     <TextField fx:id="valueInput" layoutX="25.0" layoutY="190.0" prefHeight="25.0" prefWidth="300.0" />
     <TextField fx:id="validValuesInput" layoutX="25.0" layoutY="260.0" prefHeight="25.0" prefWidth="300.0" />
-    <Label layoutX="25.0" layoutY="33.0" text="Tree View" textFill="#5b6671" />
-    <Label layoutX="25.0" layoutY="103.0" text="Status" textFill="#5b6671" />
-    <Label layoutX="25.0" layoutY="173.0" text="Value" textFill="#5b6671" />
-    <Label layoutX="25.0" layoutY="243.0" text="Valid Values" textFill="#5b6671" />
+    <Label layoutX="25.0" layoutY="33.0" text="Тип данных" textFill="#5b6671" />
+    <Label layoutX="25.0" layoutY="103.0" text="Статус" textFill="#5b6671" />
+    <Label layoutX="25.0" layoutY="173.0" text="Значение" textFill="#5b6671" />
+    <Label layoutX="25.0" layoutY="243.0" text="Диапазон значения" textFill="#5b6671" />
     <Button fx:id="submitButton" layoutX="129.0" layoutY="400.0" mnemonicParsing="false" style="-fx-background-color: #5b6671;" text="Сохранить" textFill="WHITE">
         <font>
             <Font name="System Bold" size="14.0" />

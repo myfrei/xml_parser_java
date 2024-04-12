@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.white.xml_parser_java.util.GlobalVariables.getPdfCreateMessage;
+
 
 public class TestResultController {
     private final FileData fileData;
@@ -62,6 +64,7 @@ public class TestResultController {
     public void initialize() {
         // Заполняет таблицу колонками
         tableInitialize();
+
         // Назначает выбранными вкладки с нулевым индесом.
         tabIndexes[0] = 0;
         tabIndexes[1] = 0;
@@ -121,7 +124,7 @@ public class TestResultController {
                 if (selectedFolder != null) {
                     PdfExportService pdfExportService = new PdfExportService();
                     pdfExportService.getPDF(List.of(fileData.getTestGroups().get(tabIndexes[0])), fileData.getDate(), selectedFolder.getAbsolutePath());
-                    AlertService.openAlertWindow(GlobalVariables.PDF_CREATED_MESSAGE);
+                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath()));
                 } else {
                     AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
                 }
@@ -137,7 +140,7 @@ public class TestResultController {
                 if (selectedFolder != null) {
                     PdfExportService pdfExportService = new PdfExportService();
                     pdfExportService.getPDF(fileData.getTestGroups(), fileData.getDate(), selectedFolder.getAbsolutePath());
-                    AlertService.openAlertWindow(GlobalVariables.PDF_CREATED_MESSAGE);
+                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath()));
                 } else {
                     AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
                 }
@@ -193,20 +196,20 @@ public class TestResultController {
     }
     // Создаёт столбцы таблицы
     private void tableInitialize() {
-        TableColumn<String, String> treeViewColumn = new TableColumn<>("Tree View");
-        treeViewColumn.setText("Tree View");
+        TableColumn<String, String> treeViewColumn = new TableColumn<>("Тип данных");
+        treeViewColumn.setText("Тип данных");
         treeViewColumn.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         tableColumns.add(treeViewColumn);
         table.getColumns().add(treeViewColumn);
-        TableColumn<String, String> statusColumn = new TableColumn<>("Status");
+        TableColumn<String, String> statusColumn = new TableColumn<>("Статус");
         statusColumn.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         tableColumns.add(statusColumn);
         table.getColumns().add(statusColumn);
-        TableColumn<String, String> valueColumn = new TableColumn<>("Value");
+        TableColumn<String, String> valueColumn = new TableColumn<>("Значение");
         valueColumn.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         tableColumns.add(valueColumn);
         table.getColumns().add(valueColumn);
-        TableColumn<String, String> validValuesColumn = new TableColumn<>("Valid Values");
+        TableColumn<String, String> validValuesColumn = new TableColumn<>("Диапазон значения");
         validValuesColumn.setPrefWidth((testResultWindow.getWidth() / 4) - 10);
         tableColumns.add(validValuesColumn);
         table.getColumns().add(validValuesColumn);

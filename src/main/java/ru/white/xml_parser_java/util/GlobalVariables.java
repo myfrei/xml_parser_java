@@ -50,7 +50,8 @@ public class GlobalVariables {
     public static final String VALUE_COLUMN_NAME = "Измерено";
     public static final String VALID_VALUES_COLUMN_NAME = "Допустимое значение";
     public static final String STATUS_COLUMN_NAME = "Статус";
-    public static final String PDF_CREATED_MESSAGE = "Файл успешно сохранён";
+    public static String getPdfCreateMessage(String folder) {return "Файл успешно сохранён! " +
+            "\n путь к файлу -->  :" + folder;}
     public static final String EMPTY_TEST_GROUPS_MESSAGE = "Выбранные тесты не содержат результатов для формирования PDF";
     public static final String INCORRECT_GRAPH_MESSAGE = "Экспорт в PDF остановлен, не удалось вставить график.";
 

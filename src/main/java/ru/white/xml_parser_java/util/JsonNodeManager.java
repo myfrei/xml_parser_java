@@ -28,7 +28,7 @@ public class JsonNodeManager {
         } else if (testResultNode.get("ActionOutcome") != null) {
             return String.valueOf(testResultNode.get("ActionOutcome").get("value"));
         } else {
-            return "N/A";
+            return StatusType.NONE.getRussianTranslation();
         }
     }
 }
