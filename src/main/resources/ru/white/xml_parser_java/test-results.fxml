@@ -12,6 +12,7 @@
     <Accordion fx:id="accordion" layoutY="80.0" prefHeight="380.0" style="-fx-background-color: white;" />
     <Button fx:id="exportSelectedTestPDFButton" layoutX="5.0" layoutY="470.0" mnemonicParsing="false" text="Экспорт выбранного теста в PDF" />
     <Button fx:id="exportAllPDFButton" layoutX="216.0" layoutY="470.0" mnemonicParsing="false" text="Экспорт всех тестов в PDF" />
-    <CheckBox fx:id="generalCheckBox" layoutX="730.0" layoutY="475.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" text="Выделить все результаты" />
-    <CheckBox fx:id="includeGraphCheckBox" layoutX="391.0" layoutY="475.0" mnemonicParsing="false" text="Включить графики в PDF" />
+    <Button fx:id="exportTexButton" layoutX="390.0" layoutY="470.0" mnemonicParsing="false" text="Экспорт в TEX" />
+    <CheckBox fx:id="generalCheckBox" layoutX="830.0" layoutY="475.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" text="Выделить все результаты" />
+    <CheckBox fx:id="includeGraphCheckBox" layoutX="1930.0" layoutY="475.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" text="Включить графики в PDF" />
 </Pane>

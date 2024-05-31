@@ -8,7 +8,7 @@ public enum StatusType {
     ABORTED("Ошибка"),
     USER_DEFINE("Ошибка"),
 
-    NONE("''");
+    NONE("-");
 
     private final String russianTranslation;
 

@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import ru.white.xml_parser_java.XMLViewerApplication;
 import ru.white.xml_parser_java.model.*;
 import ru.white.xml_parser_java.service.PdfExportService;
+import ru.white.xml_parser_java.service.TexExportService;
 import ru.white.xml_parser_java.util.AlertService;
 import ru.white.xml_parser_java.util.GlobalStates;
 import ru.white.xml_parser_java.util.GlobalVariables;
@@ -26,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.white.xml_parser_java.util.GlobalVariables.getPdfCreateMessage;
+import static ru.white.xml_parser_java.util.GlobalVariables.*;
 
 
 public class TestResultController {
@@ -56,7 +57,8 @@ public class TestResultController {
     private Button exportSelectedTestPDFButton;
     @FXML
     private Button exportAllPDFButton;
-
+    @FXML
+    private Button exportTexButton;
     @FXML
     private CheckBox includeGraphCheckBox;
 
@@ -124,7 +126,25 @@ public class TestResultController {
                 if (selectedFolder != null) {
                     PdfExportService pdfExportService = new PdfExportService();
                     pdfExportService.getPDF(List.of(fileData.getTestGroups().get(tabIndexes[0])), fileData.getDate(), selectedFolder.getAbsolutePath());
-                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath()));
+                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath(), getPdfFileName(fileData.getDate())));
+                } else {
+                    AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
+                }
+            } else {
+                AlertService.openAlertWindow(GlobalVariables.EMPTY_TEST_GROUPS_MESSAGE);
+            }
+        });
+        // По нажатию кнопки '' экспортирует весь тест в TEX
+        // По нажатию кнопки экспортирует весь тест в TEX
+        exportTexButton.setOnAction(actionEvent -> {
+            if (checkTestGroupListForPDF(fileData.getTestGroups())) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                File selectedFolder = directoryChooser.showDialog(((Node) actionEvent.getTarget()).getScene().getWindow());
+                if (selectedFolder != null) {
+                    // Создаем экземпляр TexExportService и вызываем метод экспорта
+                    TexExportService texExportService = new TexExportService();
+                    texExportService.exportToTEX(fileData.getTestGroups(), fileData.getDate(), selectedFolder.getAbsolutePath());
+                    AlertService.openAlertWindow(getTexCreateMessage(selectedFolder.getAbsolutePath(), getTexFileName(fileData.getDate())));
                 } else {
                     AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
                 }
@@ -140,7 +160,7 @@ public class TestResultController {
                 if (selectedFolder != null) {
                     PdfExportService pdfExportService = new PdfExportService();
                     pdfExportService.getPDF(fileData.getTestGroups(), fileData.getDate(), selectedFolder.getAbsolutePath());
-                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath()));
+                    AlertService.openAlertWindow(getPdfCreateMessage(selectedFolder.getAbsolutePath(), getPdfFileName(fileData.getDate())));
                 } else {
                     AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
                 }
@@ -360,9 +380,10 @@ public class TestResultController {
         }
         exportSelectedTestPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
         exportAllPDFButton.setLayoutY(testResultWindow.getHeight() - 30);
+        exportTexButton.setLayoutY(testResultWindow.getHeight() - 30);
         generalCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
-        generalCheckBox.setLayoutX(testResultWindow.getWidth() - 220);
+        generalCheckBox.setLayoutX(testResultWindow.getWidth() - 180);
         includeGraphCheckBox.setLayoutY(testResultWindow.getHeight() - 25);
-        includeGraphCheckBox.setLayoutX(testResultWindow.getWidth() - 450);
+        includeGraphCheckBox.setLayoutX(testResultWindow.getWidth() - 350);
     }
 }

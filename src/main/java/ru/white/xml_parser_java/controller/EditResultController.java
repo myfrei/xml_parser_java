@@ -105,7 +105,7 @@ public class EditResultController {
         try {
             comboBox.setDisable(false);
             double doubleValue = Double.parseDouble(valueInput.getText()) * comboBox.getValue().getValue();
-            if (comboBox.getValue().equals(UnitOption.NONE)) {
+            if (comboBox.getValue().equals(UnitOption.Стандарт)) {
                 valuePreview.setText(valueInput.getText());
             } else {
                 valuePreview.setText(new DecimalFormat(getPattern()).format(doubleValue));
@@ -123,9 +123,9 @@ public class EditResultController {
 
         if (GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {
             int maxAfterPointChars;
-            if (comboBox.getValue().equals(UnitOption.MICRO)) {
+            if (comboBox.getValue().equals(UnitOption.Микро)) {
                 maxAfterPointChars = valueInput.getText().split("\\.")[0].length() + 6;
-            } else if (comboBox.getValue().equals(UnitOption.MILLI)) {
+            } else if (comboBox.getValue().equals(UnitOption.Милли)) {
                 maxAfterPointChars = valueInput.getText().split("\\.")[0].length() + 3;
             } else {
                 maxAfterPointChars = 2;

@@ -103,7 +103,7 @@ public class TestService {
         testResult.setSelected(true);
         testResult.setValidValues("None");
         testResult.setStatus("Done");
-        testResult.setUnitOption(UnitOption.NONE);
+        testResult.setUnitOption(UnitOption.Стандарт);
         testResult.setName(String.valueOf(item.get("name")));
         resultList.add(testResult);
         return resultList;

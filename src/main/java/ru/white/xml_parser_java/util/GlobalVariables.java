@@ -9,8 +9,11 @@ public class GlobalVariables {
     public static final String ROOT_DIRECTORY_PATH = "./";
     public static final String IMAGE_PATH = "/images/photo.png";
     public static final List<String> TARGET_TESTS_TAG_NAMES = List.of("Test", "TestGroup", "SessionAction");
-    public static final String VALID_VALUES_UNDEFINED = "Не определено";
+    public static final String VALID_VALUES_UNDEFINED = " - ";
     public static final String EMPTY_RESULTS_LABEL = "Общие результаты";
+
+    //Символы
+    public static final String STANDART_DELIMER = " ÷ ";
     // Main window
     public static final String MAIN_WINDOW_TITLE = "XML Viewer";
     public static final int[] MAIN_WINDOW_SIZES = new int[] {890, 390};
@@ -42,6 +45,7 @@ public class GlobalVariables {
 
     // PDF
     public static String getPdfFileName (LocalDate date) { return "Результаты тестов от " + getDate(date) + ".pdf"; }
+    public static String getTexFileName (LocalDate date) { return "Результаты тестов от " + getDate(date) + ".tex"; }
     public static String getPdfTitleDate (LocalDate date) { return "Тест проведён " + getDate(date); }
     public static String getGraphPdfTitle (int tableNumber) { return "Осцилограмма к таблице № " + tableNumber; }
     public static final String PDF_TITLE = "Результаты тестов.\n";
@@ -50,8 +54,11 @@ public class GlobalVariables {
     public static final String VALUE_COLUMN_NAME = "Измерено";
     public static final String VALID_VALUES_COLUMN_NAME = "Допустимое значение";
     public static final String STATUS_COLUMN_NAME = "Статус";
-    public static String getPdfCreateMessage(String folder) {return "Файл успешно сохранён! " +
-            "\n путь к файлу -->  :" + folder;}
+    public static String getPdfCreateMessage(String folder, String name) {return "Файл успешно сохранён! " +
+            "\n" + folder + "/" + name;}
+
+    public static String getTexCreateMessage(String folder, String name) {return "Файл успешно сохранён! " +
+            "\n" + folder + "/" + name;}
     public static final String EMPTY_TEST_GROUPS_MESSAGE = "Выбранные тесты не содержат результатов для формирования PDF";
     public static final String INCORRECT_GRAPH_MESSAGE = "Экспорт в PDF остановлен, не удалось вставить график.";
 

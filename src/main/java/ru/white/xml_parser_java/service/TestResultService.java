@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.white.xml_parser_java.util.GlobalVariables.STANDART_DELIMER;
+
 public class TestResultService {
     // Возвращает список результатов тестов.
     public List<TestResult> getTestResults(JsonNode testResultGroupNode) {
@@ -27,7 +29,7 @@ public class TestResultService {
                 testResult.setStatus(JsonNodeManager.getStatus(testResultNode));
                 testResult.setValue(getValue(testResultNode));
                 testResult.setUnitValue(testResult.getValue());
-                testResult.setUnitOption(UnitOption.NONE);
+                testResult.setUnitOption(UnitOption.Стандарт);
                 // Получает сначала двойной лимит значений потом, если он не определён пробует получить одиночный.
                 String limits = getLimits(testResultNode);
                 if (limits.equals(GlobalVariables.VALID_VALUES_UNDEFINED)) {
@@ -79,7 +81,7 @@ public class TestResultService {
             for (JsonNode limitItem : limitsNode) {
                 limitItems.add(StringManager.removeQuotes(String.valueOf(limitItem.get("Datum").get("value"))));
             }
-            return limitItems.get(0) + " - " + limitItems.get(1);
+            return limitItems.get(0) + STANDART_DELIMER + limitItems.get(1);
         } catch (Exception ex) {
             return GlobalVariables.VALID_VALUES_UNDEFINED;
         }
