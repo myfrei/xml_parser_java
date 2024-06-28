@@ -1,5 +1,7 @@
 package ru.white.xml_parser_java.service;
 
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ru.white.xml_parser_java.model.Test;
 import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.model.TestResultGroup;
@@ -7,6 +9,7 @@ import ru.white.xml_parser_java.model.UnitOption;
 import ru.white.xml_parser_java.util.JsonNodeManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.white.xml_parser_java.util.StatusType;
 import ru.white.xml_parser_java.util.StringManager;
 
 import java.util.ArrayList;
@@ -91,21 +94,57 @@ public class TestService {
         if (data == null) {
             return new ArrayList<>();
         }
+
         List<TestResult> resultList = new ArrayList<>();
         JsonNode collection = data.get("Collection");
-        JsonNode item = collection.get("Item");
-        JsonNode datum = item.get("Datum");
-        JsonNode value = datum.get("value");
-        String values = String.valueOf(value).replaceAll("\"", "");
-        TestResult testResult = new TestResult();
-        testResult.setValue(values);
-        testResult.setUnitValue(values);
-        testResult.setSelected(true);
-        testResult.setValidValues("None");
-        testResult.setStatus("Done");
-        testResult.setUnitOption(UnitOption.Стандарт);
-        testResult.setName(String.valueOf(item.get("name")));
-        resultList.add(testResult);
+        JsonNode items = collection.get("Item");
+
+        if (items.isArray()) {
+            for (JsonNode item : items) {
+                JsonNode datum = item.get("Datum");
+                if (datum != null) {
+                    JsonNode value;
+                    if (datum.isArray()) {
+                        value = datum.get(0).get("value");
+                    } else {
+                        value = datum.get("value");
+                    }
+                    String values = String.valueOf(value).replaceAll("\"", "");
+                    TestResult testResult = new TestResult();
+                    testResult.setValue(values);
+                    testResult.setUnitValue(values);
+                    testResult.setSelected(true);
+                    //TODO valid values???
+                    testResult.setValidValues("");
+                    testResult.setStatus(StatusType.DONE.getRussianTranslation());
+                    testResult.setUnitOption(UnitOption.Стандарт);
+                    testResult.setName(String.valueOf(item.get("name")));
+                    resultList.add(testResult);
+                }
+            }
+        } else {
+            JsonNode datum = items.get("Datum");
+            if (datum != null) {
+                JsonNode value;
+                if (datum.isArray()) {
+                    value = datum.get(0).get("value");
+                } else {
+                    value = datum.get("value");
+                }
+                String values = String.valueOf(value).replaceAll("\"", "");
+                TestResult testResult = new TestResult();
+                testResult.setValue(values);
+                testResult.setUnitValue(values);
+                testResult.setSelected(true);
+                //TODO valid values???
+                testResult.setValidValues("");
+                testResult.setStatus(StatusType.DONE.getRussianTranslation());
+                testResult.setUnitOption(UnitOption.Стандарт);
+                testResult.setName(String.valueOf(items.get("name")));
+                resultList.add(testResult);
+            }
+        }
+
         return resultList;
     }
 }

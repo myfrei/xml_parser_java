@@ -8,6 +8,9 @@ public enum LimitComparator {
     GT (">"),
     GTE (">="),
     LT ("<"),
+    LE ("≤"),
+    GE("≥"),
+    NE("≠"),
     LTE ("<=");
 
     private final String viewValue;

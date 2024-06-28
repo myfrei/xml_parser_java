@@ -1,0 +1,71 @@
+\VAR{full_number} {Primary Supply}:  \underline{\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.
+
+%% if step_status == 'Passed' or step_status == 'Failed'
+
+	%% set prec = 1
+
+	%% set test_short_measure_high_low_exists = []
+	%% set test_short_mean_exists = []
+	%% set test_short_get_tm_voltage_shpp_off_exists = []
+	%% set test_short_errormargine_errormarginevolts_values = []
+	%% set test_short_errormargine_meanvolts_values = []
+	%% set test_short_errormargine_mean_amps_values = []
+	%% set test_short_errormargine_errormargine_amps_values = []
+	%% set test_short_channel_0_limits = []
+	%% set test_short_check_voltage_limits = []
+	%% set test_short_check_time_short_limits = []
+	
+	%% set test_short_decimgraph_waveform = []
+	%% set test_short_decimate_graph_rs_transmite_waveform = []
+	
+	%% set rs485_test_mean_exists = []
+	%% set rs485_test_check_levels_amplitude_1_limits = []
+	%% set rs485_test_check_levels_amplitude_0_limits = []	
+	
+	%% set rs485_test_decimate_graph_rs_transmite_waveform = []
+	
+	%% set substeps = e.get_substeps(step, 'SequenceCall', 'Main') 
+	%% for substep in substeps	
+		%% set substep_name = e.get_step_name(substep)
+	
+		%% set substeps_PassFailTest = e.get_substeps(substep, 'PassFailTest', 'Main')
+		%% set _ = test_short_measure_high_low_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, 'Measure High, Low'))		
+		
+		%% set substeps_Action = e.get_substeps(substep, 'Action', 'Main')
+		%% set _ = test_short_measure_high_low_exists.extend(e.get_test_status_by_name(substeps_Action, 'Measure High, Low'))
+		
+		%% set substeps_Statement = e.get_substeps(substep, 'Statement', 'Main')	
+		%% set _ = test_short_errormargine_errormarginevolts_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'ErrorMargineVolts'))
+		%% set _ = test_short_errormargine_meanvolts_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'MeanVolts'))
+		%% set _ = test_short_errormargine_mean_amps_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'Mean Amps'))
+		%% set _ = test_short_errormargine_errormargine_amps_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'ErrorMargine Amps'))
+		% если есть 2 одинаковых имени,но в разных подтестах(названных по-разному) - разделить с проверкой по имени теста
+		%% if substep_name == 'Test Short'
+			%% set _ = test_short_mean_exists.extend(e.get_test_status_by_name(substeps_Statement, 'Mean'))
+		%% elif substep_name == 'RS485 Test'
+			%% set _ = rs485_test_mean_exists.extend(e.get_test_status_by_name(substeps_Statement, 'Mean'))
+		%% endif		
+		
+		%% set substeps_NumericLimitTest = e.get_substeps(substep, 'NumericLimitTest', 'Main')
+		%% set _ = test_short_channel_0_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Channel 0', 'Numeric'))
+		%% set _ = test_short_check_voltage_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Check Voltage', 'Numeric'))
+		%% set _ = test_short_check_time_short_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Check Time Short', 'Numeric'))
+		
+		%% set substeps_NI_MultipleNumericLimitTest = e.get_substeps(substep, 'NI_MultipleNumericLimitTest', 'Main')
+		%% set _ = rs485_test_check_levels_amplitude_1_limits.extend(e.get_numeric_limits(substeps_NI_MultipleNumericLimitTest, 'Check Levels', 'Amplitude 1'))
+		%% set _ = rs485_test_check_levels_amplitude_0_limits.extend(e.get_numeric_limits(substeps_NI_MultipleNumericLimitTest, 'Check Levels', 'Amplitude 0'))
+	
+		%% if e.get_analog_waveform(substep, 'DecimGraph') != [] 
+			%% set _ = test_short_decimgraph_waveform.extend(e.get_analog_waveform(substep, 'DecimGraph'))
+		%% endif
+		
+		% если есть 2 одинаковых в разных подтестах, названных по-разному
+		%% if e.get_analog_waveform(substep, 'Decimate Graph RS-transmite') != [] and substep_name == 'Test Short'
+			%% set _ = test_short_decimate_graph_rs_transmite_waveform.extend(e.get_analog_waveform(substep, 'Decimate Graph RS-transmite'))
+		%% elif e.get_analog_waveform(substep, 'Decimate Graph RS-transmite') != [] and substep_name == 'RS485 Test'
+			%% set _ = rs485_test_decimate_graph_rs_transmite_waveform.extend(e.get_analog_waveform(substep, 'Decimate Graph RS-transmite'))
+		%% endif
+		
+	%% endfor		
+	
+%% endif

@@ -1,0 +1,93 @@
+\VAR{full_number} {PEC Test}:  \underline{\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.
+
+%% if step_status == 'Passed' or step_status == 'Failed'
+
+	%% set prec = 1
+	% точки и прочие знаки - удалять
+	%% set single_channel_test_set_pec_035v_set_0_v_values = []
+	%% set single_channel_test_set_pec_035v_check_0_v_limits = []
+	
+	%% set single_channel_test_get_tm_pec_voltage_limits = []
+	%% set single_channel_test_check_voltage_by_dmm_limits = []
+	
+	%% set single_channel_test_set_pec_069v_set_0_v_values = []
+	%% set single_channel_test_set_pec_069v_check_0_v_limits = []
+	
+	%% set single_channel_test_set_pec_001v_set_0_v_values = []	
+	%% set single_channel_test_set_pec_001v_check_0_v_limits = []
+	
+	%% set multiple_channel_test_final_channel_0_limits = []
+	%% set multiple_channel_test_final_high_low_exists = []
+	%% set multiple_channel_test_final_errormargine_errormarginevolts_values = []
+	%% set multiple_channel_test_final_errormargine_meanvolts_values = []
+	%% set multiple_channel_test_final_errormargine_mean_amps_values = []
+	%% set multiple_channel_test_final_errormargine_errormargine_amps_values = []
+	%% set multiple_channel_test_final_mean_exists = []
+	%% set multiple_channel_test_final_check_voltage_limits = []
+	%% set multiple_channel_test_final_check_time_short_limits = []
+	%% set multiple_channel_test_final_get_tm_voltage_shpp_off_exists = []
+	
+	%% set multiple_channel_test_final_decimgraph_waveform = []	
+
+	%% set substeps = e.get_substeps(step, 'SequenceCall', 'Main')
+	%% for substep in substeps	
+		%% set substep_name = e.get_step_name(substep)
+		
+		%% set subsubsteps = e.get_substeps(substep, 'SequenceCall', 'Main')
+		
+		%% for subsubstep in subsubsteps	
+			%% set subsubstep_name = e.get_step_name(subsubstep)
+			
+			%% if subsubstep_name == 'Set PEC 0.35V' and substep_name == 'Single Channel Test'
+				%% set subsubsteps_Action = e.get_substeps(subsubstep, 'Action', 'Main')
+				%% set _ = single_channel_test_set_pec_035v_set_0_v_values.extend(e.get_value_and_status_from_action(subsubsteps_Action, 'Set 0 V','Total Iterations'))				
+				%% set subsubsteps_NumericLimitTest = e.get_substeps(subsubstep, 'NumericLimitTest', 'Main')
+				%% set _ = single_channel_test_set_pec_035v_check_0_v_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Check 0 V', 'Numeric'))
+			%% elif subsubstep_name == 'Set PEC 0.69V' and substep_name == 'Single Channel Test'
+				%% set subsubsteps_Action = e.get_substeps(subsubstep, 'Action', 'Main')
+				%% set _ = single_channel_test_set_pec_069v_set_0_v_values.extend(e.get_value_and_status_from_action(subsubsteps_Action, 'Set 0 V','Total Iterations'))				
+				%% set subsubsteps_NumericLimitTest = e.get_substeps(subsubstep, 'NumericLimitTest', 'Main')
+				%% set _ = single_channel_test_set_pec_069v_check_0_v_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Check 0 V', 'Numeric'))
+			%% elif subsubstep_name == 	'Set PEC 0.01V' and substep_name == 'Single Channel Test'
+				%% set subsubsteps_Action = e.get_substeps(subsubstep, 'Action', 'Main')
+				%% set _ = single_channel_test_set_pec_001v_set_0_v_values.extend(e.get_value_and_status_from_action(subsubsteps_Action, 'Set 0 V','Total Iterations'))				
+				%% set subsubsteps_NumericLimitTest = e.get_substeps(subsubstep, 'NumericLimitTest', 'Main')
+				%% set _ = single_channel_test_set_pec_001v_check_0_v_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Check 0 V', 'Numeric'))
+			%% elif subsubstep_name == 'Final' and substep_name == 'Multiple Channel Test'
+				%% set subsubsteps_NumericLimitTest = e.get_substeps(subsubstep, 'NumericLimitTest', 'Main')
+				%% set _ = multiple_channel_test_final_channel_0_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Channel 0', 'Numeric'))
+				%% set _ = multiple_channel_test_final_check_voltage_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Check Voltage', 'Numeric'))
+				%% set _ = multiple_channel_test_final_check_time_short_limits.extend(e.get_numeric_limits(subsubsteps_NumericLimitTest, 'Check Time Short', 'Numeric'))
+				
+				%% set subsubsteps_Action = e.get_substeps(subsubstep, 'Action', 'Main')
+				%% set _ = multiple_channel_test_final_high_low_exists.extend(e.get_test_status_by_name(subsubsteps_Action, 'Measure High, Low'))
+				
+				%% set subsubsteps_Statement = e.get_substeps(subsubstep, 'Statement', 'Main')	
+				%% set _ = multiple_channel_test_final_errormargine_errormarginevolts_values.extend(e.get_value_and_status_from_action(subsubsteps_Statement, 'ErrorMargine', 'ErrorMargineVolts'))
+				%% set _ = multiple_channel_test_final_errormargine_meanvolts_values.extend(e.get_value_and_status_from_action(subsubsteps_Statement, 'ErrorMargine', 'MeanVolts'))
+				%% set _ = multiple_channel_test_final_errormargine_mean_amps_values.extend(e.get_value_and_status_from_action(subsubsteps_Statement, 'ErrorMargine', 'Mean Amps'))
+				%% set _ = multiple_channel_test_final_errormargine_errormargine_amps_values.extend(e.get_value_and_status_from_action(subsubsteps_Statement, 'ErrorMargine', 'ErrorMargine Amps'))
+				%% set _ = multiple_channel_test_final_mean_exists.extend(e.get_test_status_by_name(subsubsteps_Statement, 'Mean'))
+				
+				%% set subsubsteps_PassFailTest = e.get_substeps(subsubstep, 'PassFailTest', 'Main')
+				%% set _ = multiple_channel_test_final_get_tm_voltage_shpp_off_exists.extend(e.get_test_status_by_name(subsubsteps_PassFailTest, 'Get TM Voltage ShPP Off'))
+				
+				%% if e.get_analog_waveform(subsubstep, 'DecimGraph') != [] 
+					%% set _ = multiple_channel_test_final_decimgraph_waveform.extend(e.get_analog_waveform(subsubstep, 'DecimGraph'))
+				%% endif
+				
+				
+				
+			%% endif
+			
+		
+		%% endfor
+		
+		%% set substeps_NumericLimitTest = e.get_substeps(substep, 'NumericLimitTest', 'Main')
+		%% set _ = single_channel_test_get_tm_pec_voltage_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Get TM PEC Voltage', 'Numeric'))
+		%% set _ = single_channel_test_check_voltage_by_dmm_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Check Voltage by DMM', 'Numeric'))
+		
+		
+	%% endfor
+	
+%% endif

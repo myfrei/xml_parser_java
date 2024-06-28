@@ -1,0 +1,54 @@
+\VAR{full_number} {Test AB}:  \underline{\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.
+
+%% if step_status == 'Passed' or step_status == 'Failed'
+
+	%% set prec = 1
+	
+	%% set check_tm_exists = []
+	%% set set_voltages_exists = []
+	%% set ni_dmm_check_voltage_ab1_values = []
+	%% set errormargine_errormarginevolts_values = []
+	%% set errormargine_meanvolts_values = []
+	%% set check_voltage_from_kpa_ksu_on_limits = []
+	%% set check_voltage_ksu_off_limits = []
+	%% set checkv_limits = []
+	%% set checki_limits = []
+	%% set check_levels_amplitude_1_limits = []
+	%% set check_levels_amplitude_0_limits = []
+	
+	%% set decimgraph_waveform = []
+	%% set decimate_graph_rs_transmite_waveform = []
+	
+	%% set substeps_PassFailTest = e.get_substeps(step, 'PassFailTest', 'Main')
+	%% set _ = check_tm_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, 'Check TM'))
+	%% set _ = set_voltages_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, 'Set Voltages'))
+	
+	% Если у Action есть значение - функция get_value_and_status_from_action, иначе get_test_status_by_name
+	%% set substeps_Action = e.get_substeps(step, 'Action', 'Main')
+	%% set _ = ni_dmm_check_voltage_ab1_values.extend(e.get_value_and_status_from_action(substeps_Action, 'NI DMM Check Voltage AB1 ', 'Measurement'))
+	
+	%% set substeps_Statement = e.get_substeps(step, 'Statement', 'Main')	
+	%% set _ = errormargine_errormarginevolts_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'ErrorMargineVolts'))
+	%% set _ = errormargine_meanvolts_values.extend(e.get_value_and_status_from_action(substeps_Statement, 'ErrorMargine', 'MeanVolts'))
+	
+	%% set substeps_NumericLimitTest = e.get_substeps(step, 'NumericLimitTest', 'Main')
+	%% set _ = check_voltage_from_kpa_ksu_on_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Check Voltage From KPA KSU On', 'Numeric'))
+	%% set _ = check_voltage_ksu_off_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'Check Voltage KSU Off', 'Numeric'))
+	%% set _ = checkv_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'CheckV', 'Numeric'))
+	%% set _ = checki_limits.extend(e.get_numeric_limits(substeps_NumericLimitTest, 'CheckI', 'Numeric'))
+	
+	%% set substeps_NI_MultipleNumericLimitTest = e.get_substeps(step, 'NI_MultipleNumericLimitTest', 'Main')
+	%% set _ = check_levels_amplitude_1_limits.extend(e.get_numeric_limits(substeps_NI_MultipleNumericLimitTest, 'Check Levels', 'Amplitude 1'))
+	%% set _ = check_levels_amplitude_0_limits.extend(e.get_numeric_limits(substeps_NI_MultipleNumericLimitTest, 'Check Levels', 'Amplitude 0'))
+	
+	%% if e.get_analog_waveform(step, 'DecimGraph') != []
+		%% set _ = decimgraph_waveform.extend(e.get_analog_waveform(step, 'DecimGraph'))
+	%% endif
+	
+	%% if e.get_analog_waveform(step, 'Decimate Graph RS-transmite') != []
+		%% set _ = decimate_graph_rs_transmite_waveform.extend(e.get_analog_waveform(step, 'Decimate Graph RS-transmite'))
+	%% endif
+	
+	%% print(decimate_graph_rs_transmite_waveform)
+	
+%% endif
