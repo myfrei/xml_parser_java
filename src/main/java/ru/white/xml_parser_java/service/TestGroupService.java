@@ -51,7 +51,8 @@ public class TestGroupService {
                         }
                     }
                 });
-                result.setTests(mergeEmptyTests(tests));
+                result.setTests(tests);
+                //result.setTests(mergeEmptyTests(tests));
                 return Optional.of(result);
             } else {
                 return Optional.empty();
@@ -66,6 +67,7 @@ public class TestGroupService {
         String outcomeStatus = String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", "");
         return outcomeStatus.equals("Passed")
                 || outcomeStatus.equals("Failed")
+                || outcomeStatus.equals("Done")
                 || (GlobalStates.isUserDefined() && outcomeStatus.equals("UserDefined"));
     }
 

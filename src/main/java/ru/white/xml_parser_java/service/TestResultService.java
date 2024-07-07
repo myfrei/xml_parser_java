@@ -47,6 +47,38 @@ public class TestResultService {
         return getRoundedValue(stringValue);
     }
 
+    public List<TestResult> getTestResultsFromSessionAction(JsonNode testResultGroupNode) {
+        List<TestResult> result = new ArrayList<>();
+        JsonNode testResultNodes = testResultGroupNode.get("Data");
+        if (testResultNodes != null) {
+            String state = testResultGroupNode.get("Extension").get("TSStepProperties").get("StepType").asText();
+            if (state.equals("Statement")) {
+                JsonNode collectionNode = testResultNodes.get("Collection");
+                if (collectionNode != null) {
+                    for (JsonNode itemNode : JsonNodeManager.separateUnitedNodes(collectionNode.get("Item"))) {
+                        TestResult testResult = new TestResult();
+
+                        testResult.setName(StringManager.removeQuotes(String.valueOf(itemNode.get("name"))));
+                        testResult.setStatus(JsonNodeManager.getStatus(testResultGroupNode)); // Статус из родительского узла
+                        testResult.setValue(getValueFromDatum(itemNode));
+                        testResult.setUnitValue(testResult.getValue());
+                        testResult.setUnitOption(UnitOption.Стандарт);
+                        testResult.setValidValues(GlobalVariables.VALID_VALUES_UNDEFINED); // Лимиты не указаны в данном случае
+                        result.add(testResult);
+
+                    }
+                }
+            }
+        }
+        return result; // Возвращаем результат для Data узла
+    }
+
+    // Возвращает значение из узла Datum для структуры Data
+    private String getValueFromDatum(JsonNode itemNode) {
+        String stringValue = StringManager.removeQuotes(String.valueOf(itemNode.get("Datum").get("value")));
+        return getRoundedValue(stringValue);
+    }
+
     // Парсит строку, округляет согласно глобальному состоянию 'roundingOptional' и возвращает значение.
     private String getRoundedValue(String value) {
         if (!GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {

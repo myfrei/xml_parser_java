@@ -61,6 +61,7 @@ public class TestService {
     private boolean checkTestOutcomeStatus(JsonNode testGroupNode) {
         String outcomeStatus = String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", "");
         return outcomeStatus.equals("Passed")
+                || outcomeStatus.equals("Done")
                 || outcomeStatus.equals("Failed");
     }
 }

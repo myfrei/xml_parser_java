@@ -55,10 +55,10 @@ public class GlobalVariables {
     public static final String VALID_VALUES_COLUMN_NAME = "Допустимое значение";
     public static final String STATUS_COLUMN_NAME = "Статус";
     public static String getPdfCreateMessage(String folder, String name) {return "Файл успешно сохранён! " +
-            "\n" + folder + "/" + name;}
+            "\n" + folder + "\\" + name;}
 
     public static String getTexCreateMessage(String folder, String name) {return "Файл успешно сохранён! " +
-            "\n" + folder + "/" + name;}
+            "\n" + folder + "\\" + name;}
     public static final String EMPTY_TEST_GROUPS_MESSAGE = "Выбранные тесты не содержат результатов для формирования PDF";
     public static final String INCORRECT_GRAPH_MESSAGE = "Экспорт в PDF остановлен, не удалось вставить график.";
 

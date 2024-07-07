@@ -33,16 +33,25 @@ public class TestResultGroupService {
                     // Получение результатов и присвоение их группе.
                     TestResultService testResultService = new TestResultService();
                     testResultGroup.setResults(testResultService.getTestResults(testResultGroupNode));
+                   // System.out.println(testResultGroup);
+
                     // Проверяет есть ли у группы результатов график. Строит и присваивает его если он есть.
                     if (testResultGroup.getName().equals(GlobalVariables.GRAPH_NODE_NAME)) {
                         GraphService graphService = new GraphService();
-                        testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));                    }
+                        testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));
+                    }
+
+                    if (testResultGroup.getResults().isEmpty() && testResultGroup.getGraph() == null) {
+                        System.out.println(testResultGroup);
+                        testResultGroup.setResults(testResultService.getTestResultsFromSessionAction(testResultGroupNode));
+                    }
                     // Добавление группы результатов в результирующий список.
                     result.add(testResultGroup);
                 }
             }
         });
-        return mergeSameNamesTestResultGroups(result);
+        //return mergeSameNamesTestResultGroups(result);
+        return result;
     }
 
     // Объединяет группы результатов с одинаковыми именами.
