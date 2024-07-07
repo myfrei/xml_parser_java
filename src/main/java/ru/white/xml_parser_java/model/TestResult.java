@@ -9,6 +9,19 @@ public class TestResult {
     private String validValues;
     private boolean selected;
 
+    @Override
+    public String toString() {
+        return "TestResult{" +
+                "name='" + name + '\'' +
+                ", status='" + status + '\'' +
+                ", value='" + value + '\'' +
+                ", unitValue='" + unitValue + '\'' +
+                ", unitOption=" + unitOption +
+                ", validValues='" + validValues + '\'' +
+                ", selected=" + selected +
+                '}';
+    }
+
     public TestResult() {
         this.selected = true;
     }

@@ -4,6 +4,15 @@ import java.util.List;
 
 public class TestGroup implements Comparable<TestGroup> {
     private String name;
+
+    @Override
+    public String toString() {
+        return "TestGroup{" +
+                "name='" + name + '\'' +
+                ", tests=" + tests +
+                '}';
+    }
+
     private List<Test> tests;
 
     public String getName() {

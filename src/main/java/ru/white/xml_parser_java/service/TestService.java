@@ -1,15 +1,10 @@
 package ru.white.xml_parser_java.service;
 
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import ru.white.xml_parser_java.model.Test;
-import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.model.TestResultGroup;
-import ru.white.xml_parser_java.model.UnitOption;
 import ru.white.xml_parser_java.util.JsonNodeManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import ru.white.xml_parser_java.util.StatusType;
 import ru.white.xml_parser_java.util.StringManager;
 
 import java.util.ArrayList;
@@ -46,14 +41,8 @@ public class TestService {
                 if (results.isEmpty()) {
                     TestResultGroup singleGroup = new TestResultGroup();
                     singleGroup.setName(result.getName());
-                    JsonNode outcomeOrActionOutcome = getOutcomeOrActionOutcome(testNode);
-                    singleGroup.setStatus(String.valueOf(outcomeOrActionOutcome.get("value")).replaceAll("\"", ""));
-                    if (singleGroup.getStatus().equals("Done")) {
-                        List<TestResult> newTestResultList = getData(testNode);
-                        singleGroup.setResults(newTestResultList);
-                    } else {
-                        singleGroup.setResults(new ArrayList<>());
-                    }
+                    singleGroup.setStatus(String.valueOf(testNode.get("Outcome").get("value")).replaceAll("\"", ""));
+                    singleGroup.setResults(new ArrayList<>());
                     singleGroup.setSelected(true);
                     singleGroup.setEmpty(true);
                     results.add(singleGroup);
@@ -70,82 +59,9 @@ public class TestService {
 
     // Проверяет статус теста.
     private boolean checkTestOutcomeStatus(JsonNode testGroupNode) {
-        JsonNode outcomeOrActionOutcome = getOutcomeOrActionOutcome(testGroupNode);
-        String outcomeStatus = String.valueOf(outcomeOrActionOutcome.get("value")).replaceAll("\"", "");
+        String outcomeStatus = String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", "");
         return outcomeStatus.equals("Passed")
-                || outcomeStatus.equals("Done")
                 || outcomeStatus.equals("Failed");
-    }
-
-    private JsonNode getOutcomeOrActionOutcome(JsonNode testGroupNode) {
-        JsonNode outcome = testGroupNode.get("Outcome");
-        if (outcome != null) {
-            return outcome;
-        }
-        JsonNode outcome1 = testGroupNode.get("ActionOutcome");
-        if (outcome1 != null) {
-            return outcome1;
-        }
-        return null;
-    }
-
-    private List<TestResult> getData(JsonNode testGroupNode) {
-        JsonNode data = testGroupNode.get("Data");
-        if (data == null) {
-            return new ArrayList<>();
-        }
-
-        List<TestResult> resultList = new ArrayList<>();
-        JsonNode collection = data.get("Collection");
-        JsonNode items = collection.get("Item");
-
-        if (items.isArray()) {
-            for (JsonNode item : items) {
-                JsonNode datum = item.get("Datum");
-                if (datum != null) {
-                    JsonNode value;
-                    if (datum.isArray()) {
-                        value = datum.get(0).get("value");
-                    } else {
-                        value = datum.get("value");
-                    }
-                    String values = String.valueOf(value).replaceAll("\"", "");
-                    TestResult testResult = new TestResult();
-                    testResult.setValue(values);
-                    testResult.setUnitValue(values);
-                    testResult.setSelected(true);
-                    //TODO valid values???
-                    testResult.setValidValues("");
-                    testResult.setStatus(StatusType.DONE.getRussianTranslation());
-                    testResult.setUnitOption(UnitOption.Стандарт);
-                    testResult.setName(String.valueOf(item.get("name")));
-                    resultList.add(testResult);
-                }
-            }
-        } else {
-            JsonNode datum = items.get("Datum");
-            if (datum != null) {
-                JsonNode value;
-                if (datum.isArray()) {
-                    value = datum.get(0).get("value");
-                } else {
-                    value = datum.get("value");
-                }
-                String values = String.valueOf(value).replaceAll("\"", "");
-                TestResult testResult = new TestResult();
-                testResult.setValue(values);
-                testResult.setUnitValue(values);
-                testResult.setSelected(true);
-                //TODO valid values???
-                testResult.setValidValues("");
-                testResult.setStatus(StatusType.DONE.getRussianTranslation());
-                testResult.setUnitOption(UnitOption.Стандарт);
-                testResult.setName(String.valueOf(items.get("name")));
-                resultList.add(testResult);
-            }
-        }
-
-        return resultList;
     }
 }
 

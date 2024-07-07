@@ -38,21 +38,6 @@ public class TestResultService {
                 testResult.setValidValues(limits);
                 result.add(testResult);
             }
-        } else {
-            JsonNode testResultNodes2 = testResultGroupNode.get("Data");
-            if (testResultNodes2 != null) {
-                JsonNode collection = testResultNodes2.get("Collection");
-                JsonNode item = collection.get("Item");
-                TestResult testResult = new TestResult();
-                testResult.setName(item.get("name").asText());
-                testResult.setValue(item.get("Datum").get("value").asText());
-                testResult.setValidValues("");
-                testResult.setSelected(true);
-                testResult.setStatus("");
-                result.add(testResult);
-            }
-
-
         }
         return result;
     }

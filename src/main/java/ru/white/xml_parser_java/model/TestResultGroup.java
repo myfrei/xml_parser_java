@@ -64,6 +64,18 @@ public class TestResultGroup {
         return this.empty;
     }
 
+    @Override
+    public String toString() {
+        return "TestResultGroup{" +
+                "name='" + name + '\'' +
+                ", status='" + status + '\'' +
+                ", results=" + results +
+                ", graph=" + graph +
+                ", selected=" + selected +
+                ", empty=" + empty +
+                '}';
+    }
+
     public void setEmpty(boolean empty) {
         this.empty = empty;
     }

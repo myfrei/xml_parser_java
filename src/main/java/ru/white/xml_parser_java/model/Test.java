@@ -18,6 +18,14 @@ public class Test {
         return resultGroups;
     }
 
+    @Override
+    public String toString() {
+        return "Test{" +
+                "name='" + name + '\'' +
+                ", resultGroups=" + resultGroups +
+                '}';
+    }
+
     public void setResultGroups(List<TestResultGroup> resultGroups) {
         this.resultGroups = resultGroups;
     }
