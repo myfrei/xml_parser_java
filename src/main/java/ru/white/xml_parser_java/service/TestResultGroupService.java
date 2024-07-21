@@ -36,13 +36,12 @@ public class TestResultGroupService {
                    // System.out.println(testResultGroup);
 
                     // Проверяет есть ли у группы результатов график. Строит и присваивает его если он есть.
-                    if (testResultGroup.getName().equals(GlobalVariables.GRAPH_NODE_NAME)) {
+                    if (testResultGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
                         GraphService graphService = new GraphService();
                         testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));
                     }
 
                     if (testResultGroup.getResults().isEmpty() && testResultGroup.getGraph() == null) {
-                        System.out.println(testResultGroup);
                         testResultGroup.setResults(testResultService.getTestResultsFromSessionAction(testResultGroupNode));
                     }
                     // Добавление группы результатов в результирующий список.

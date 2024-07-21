@@ -2,12 +2,15 @@ package ru.white.xml_parser_java.service;
 
 import ru.white.xml_parser_java.model.Test;
 import ru.white.xml_parser_java.model.TestResultGroup;
+import ru.white.xml_parser_java.util.GlobalVariables;
 import ru.white.xml_parser_java.util.JsonNodeManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.white.xml_parser_java.util.StatusType;
 import ru.white.xml_parser_java.util.StringManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,12 +43,20 @@ public class TestService {
                 // потом такие результаты будут объединены в один общий тест.
                 if (results.isEmpty()) {
                     TestResultGroup singleGroup = new TestResultGroup();
+                    TestResultService singleTestResulService = new TestResultService();
                     singleGroup.setName(result.getName());
-                    singleGroup.setStatus(String.valueOf(testNode.get("Outcome").get("value")).replaceAll("\"", ""));
-                    singleGroup.setResults(new ArrayList<>());
+                    singleGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testNode))).getRussianTranslation());
+                    singleGroup.setResults(singleTestResulService.getTestResults(testNode));
                     singleGroup.setSelected(true);
-                    singleGroup.setEmpty(true);
+                    singleGroup.setEmpty(singleGroup.getResults().isEmpty());
                     results.add(singleGroup);
+                    if (singleGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
+                        GraphService graphService = new GraphService();
+                        singleGroup.setGraph(graphService.getGraph(testNode));
+                    }
+                    if (singleGroup.getResults().isEmpty() && singleGroup.getGraph() == null) {
+                        singleGroup.setResults(singleTestResulService.getTestResultsFromSessionAction(testNode));
+                    }
                 }
                 result.setResultGroups(results);
                 return Optional.of(result);
@@ -53,13 +64,20 @@ public class TestService {
                 return Optional.empty();
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             return Optional.empty();
         }
     }
 
     // Проверяет статус теста.
     private boolean checkTestOutcomeStatus(JsonNode testGroupNode) {
-        String outcomeStatus = String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", "");
+        JsonNode jsonNode = testGroupNode.get("Outcome");
+        String outcomeStatus;
+        if (jsonNode != null) {
+            outcomeStatus = String.valueOf(jsonNode.get("value")).replaceAll("\"", "");
+        } else {
+            outcomeStatus = String.valueOf(testGroupNode.get("ActionOutcome").get("value")).replaceAll("\"", "");
+        }
         return outcomeStatus.equals("Passed")
                 || outcomeStatus.equals("Done")
                 || outcomeStatus.equals("Failed");

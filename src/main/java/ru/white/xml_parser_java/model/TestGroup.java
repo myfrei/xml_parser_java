@@ -4,6 +4,7 @@ import java.util.List;
 
 public class TestGroup implements Comparable<TestGroup> {
     private String name;
+    private String originName;
 
     @Override
     public String toString() {
@@ -21,6 +22,14 @@ public class TestGroup implements Comparable<TestGroup> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOriginName() {
+        return originName;
+    }
+
+    public void setOriginName(String originName) {
+        this.originName = originName;
     }
 
     public List<Test> getTests() {

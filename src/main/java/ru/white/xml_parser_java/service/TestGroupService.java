@@ -35,8 +35,10 @@ public class TestGroupService {
             if (checkTestGroupOutcomeStatus(testGroupNode)) {
                 // Присвоение имени группе тестов.
                 if (testGroupNode.get("callerName") != null) {
+                    result.setOriginName(String.valueOf(testGroupNode.get("callerName")));
                     result.setName(StringManager.getTestGroupName(String.valueOf(testGroupNode.get("callerName"))));
                 } else {
+                    result.setOriginName(String.valueOf(testGroupNode.get("name")));
                     result.setName(StringManager.getTestGroupName(String.valueOf(testGroupNode.get("name"))));
                 }
                 // Получение вложенных тестов и присвоение их текущей группе.

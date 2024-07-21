@@ -29,6 +29,6 @@ public enum StatusType {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unknown status: " + text);
+        return StatusType.NONE;
     }
 }

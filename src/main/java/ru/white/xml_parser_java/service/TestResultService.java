@@ -5,10 +5,7 @@ import ru.white.xml_parser_java.model.LimitComparator;
 import ru.white.xml_parser_java.model.RoundingOptionals;
 import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.model.UnitOption;
-import ru.white.xml_parser_java.util.GlobalStates;
-import ru.white.xml_parser_java.util.GlobalVariables;
-import ru.white.xml_parser_java.util.JsonNodeManager;
-import ru.white.xml_parser_java.util.StringManager;
+import ru.white.xml_parser_java.util.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,7 +23,7 @@ public class TestResultService {
             for (JsonNode testResultNode : JsonNodeManager.separateUnitedNodes(testResultNodes)) {
                 TestResult testResult = new TestResult();
                 testResult.setName(StringManager.removeQuotes(String.valueOf(testResultNode.get("name"))));
-                testResult.setStatus(JsonNodeManager.getStatus(testResultNode));
+                testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultNode))).getRussianTranslation()); // Статус из родительского узла
                 testResult.setValue(getValue(testResultNode));
                 testResult.setUnitValue(testResult.getValue());
                 testResult.setUnitOption(UnitOption.Стандарт);
@@ -43,8 +40,13 @@ public class TestResultService {
     }
     // Возвращает значение результата теста, округлённое согласно глобальному состоянию 'roundingOptional'
     private String getValue(JsonNode testResultNode) {
-        String stringValue = StringManager.removeQuotes(String.valueOf(testResultNode.get("TestData").get("Datum").get("value")));
-        return getRoundedValue(stringValue);
+        try {
+            String stringValue = StringManager.removeQuotes(String.valueOf(testResultNode.get("TestData").get("Datum").get("value")));
+            return getRoundedValue(stringValue);
+
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     public List<TestResult> getTestResultsFromSessionAction(JsonNode testResultGroupNode) {
@@ -52,14 +54,14 @@ public class TestResultService {
         JsonNode testResultNodes = testResultGroupNode.get("Data");
         if (testResultNodes != null) {
             String state = testResultGroupNode.get("Extension").get("TSStepProperties").get("StepType").asText();
-            if (state.equals("Statement")) {
+            if (state.equals("Statement") || state.equals("Action")) {
                 JsonNode collectionNode = testResultNodes.get("Collection");
                 if (collectionNode != null) {
                     for (JsonNode itemNode : JsonNodeManager.separateUnitedNodes(collectionNode.get("Item"))) {
                         TestResult testResult = new TestResult();
 
                         testResult.setName(StringManager.removeQuotes(String.valueOf(itemNode.get("name"))));
-                        testResult.setStatus(JsonNodeManager.getStatus(testResultGroupNode)); // Статус из родительского узла
+                        testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation()); // Статус из родительского узла
                         testResult.setValue(getValueFromDatum(itemNode));
                         testResult.setUnitValue(testResult.getValue());
                         testResult.setUnitOption(UnitOption.Стандарт);
