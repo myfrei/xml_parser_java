@@ -34,15 +34,20 @@ public class TexExportService {
         StringBuilder sb = new StringBuilder();
         sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:  \\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
 
+
+        //TODO добавить StepType и использовать его в tex
         sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
         sb.append("\t%% set prec = 1\n\n");
 
+        //TODO дописать waveform для графиков
         // Сеттеры для всех возможных значений
         Set<String> uniqueSetters = new HashSet<>();
         Set<String> passFailTestSet = new HashSet<>();
         Set<String> actionSet = new HashSet<>();
         Set<String> statementSet = new HashSet<>();
-
+        //TODO limits если есть диапазон и values если нет дипазона
+        //TODO если одно вложение не писать его оставлять только values если больше 1 вложения название+values
+        //TODO если нет value должно быть exist в конце
         for (Test test : testGroup.getTests()) {
             for (TestResultGroup resultGroup : test.getResultGroups()) {
                 uniqueSetters.addAll(formatSetters(resultGroup));
