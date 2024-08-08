@@ -1,11 +1,10 @@
 package ru.white.xml_parser_java;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -16,7 +15,7 @@ import ru.white.xml_parser_java.controller.InstructionController;
 import ru.white.xml_parser_java.controller.TestResultController;
 import ru.white.xml_parser_java.model.FileData;
 import ru.white.xml_parser_java.model.RoundingOptionals;
-import ru.white.xml_parser_java.service.FileService;
+import ru.white.xml_parser_java.service.*;
 import ru.white.xml_parser_java.util.AlertService;
 import ru.white.xml_parser_java.util.GlobalStates;
 import ru.white.xml_parser_java.util.GlobalVariables;
@@ -28,163 +27,150 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class XMLViewerMainController extends Parent {
+public class XMLViewerMainController {
+
     private FileService fileService;
     private DirectoryChooser directoryChooser;
     private List<File> currentDirectoryFiles;
 
+    // Конструктор по умолчанию, необходимый для FXML
+    public XMLViewerMainController() {
+        this.fileService = new FileService(
+                new XmlMapper(),
+                new TestGroupService(
+                        new TestService(
+                                new TestResultGroupService(
+                                        new TestResultService(), new GraphService()
+                                )
+                        )
+                )
+        );
+        this.directoryChooser = new DirectoryChooser();
+        this.currentDirectoryFiles = fileService.getFilesByDirectory(GlobalVariables.ROOT_DIRECTORY_PATH);
+    }
+
     @FXML
     private ImageView imageView;
-
     @FXML
     private TextField fileNameInput;
-
     @FXML
     private TextField folderPathInput;
-
     @FXML
     private Button changeFolderByPathButton;
-
     @FXML
     private ListView<String> rootDirectoryViewer;
-
     @FXML
     private Button chooseFolderButton;
-
     @FXML
     private CheckBox anotherDirectoriesFlag;
-
     @FXML
     private CheckBox skipUserDefinedFlag;
-
     @FXML
     private CheckBox skipEmptyResultsFlag;
-
     @FXML
     private ComboBox<String> roundingChooser;
-
     @FXML
     private Button instructionButton;
-
     @FXML
     private Button startButton;
 
     @FXML
     public void initialize() {
-        // Инициирует FileService, DirectoryChooser и currentDirectoryFiles.
-        fileService = new FileService();
-        directoryChooser = new DirectoryChooser();
-        currentDirectoryFiles = fileService.getFilesByDirectory(GlobalVariables.ROOT_DIRECTORY_PATH);
-        // Заполняет окно для просмотра файлов списком файлов из корневой директории
+        setupUIComponents();
+        setupListeners();
+        loadInitialDirectoryFiles();
+    }
+
+    private void setupUIComponents() {
         rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
-        // Делает неактивной инпут пути к папке и кнопку "Выбрать папку".
         chooseFolderButton.setDisable(true);
         folderPathInput.setDisable(true);
         changeFolderByPathButton.setDisable(true);
-        // Заполняет выпадающий список для выбора варианта округления результата.
         roundingChooser.setItems(FXCollections.observableArrayList(RoundingOptionals.getListOfRoundingOptions()));
         roundingChooser.setValue(RoundingOptionals.NO_ROUND.getTitle());
-        // Помещает изображение в ImageView.
         imageView.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream(GlobalVariables.IMAGE_PATH))));
-
-        // Слушает инпут и по вводу запроса осуществляет фильтрацию списка доступных файлов.
-        fileNameInput.textProperty().addListener((ov, oldV, newV) -> {
-            List<String> fileNamesListBasedOnQuery = getFileNamesList(currentDirectoryFiles)
-                    .stream()
-                    .filter(fileName -> fileName.toLowerCase().contains(newV.toLowerCase()))
-                    .collect(Collectors.toList());
-            rootDirectoryViewer.setItems(FXCollections.observableArrayList(fileNamesListBasedOnQuery));
-        });
-        // Осуществляет переход по указанному в 'folderPathInput' пути по нажатию Enter при активном инпуте.
-        folderPathInput.setOnAction(event -> {
-            if (event.getEventType().toString().equals("ACTION")) {
-                changeFolderByPath();
-            }
-        });
-
-        // Осуществляет переход по указанному в 'folderPathInput' пути по нажатию кнопи 'Перейти' рядом с инпутом.
-        changeFolderByPathButton.setOnAction(event -> {
-            changeFolderByPath();
-        });
-        // Слушает флаг "Разрешить выбор файлов из других папок" и делает активной/не активной соответствующие кнопку и инпут.
-        anotherDirectoriesFlag.setOnAction(actionEvent -> {
-            chooseFolderButton.setDisable(!anotherDirectoriesFlag.isSelected());
-            folderPathInput.setDisable(!anotherDirectoriesFlag.isSelected());
-            changeFolderByPathButton.setDisable(!anotherDirectoriesFlag.isSelected());
-        });
-
-        // Выбор папки с файлами.
-        chooseFolderButton.setOnAction(event -> {
-            File selectedFolder = directoryChooser.showDialog(((Node) event.getTarget()).getScene().getWindow());
-            if (selectedFolder != null) {
-                folderPathInput.setText(selectedFolder.getAbsolutePath());
-                currentDirectoryFiles.clear();
-                currentDirectoryFiles.addAll(fileService.getFilesByDirectory(selectedFolder.getAbsolutePath()));
-                rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
-            } else {
-                AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
-            }
-        });
-
-        // Слушает флаг "Skip UserDefined" и изменяет соответствующее глобальное состояние.
-        skipUserDefinedFlag.setOnAction(actionEvent -> {
-            GlobalStates.setUserDefined(!skipUserDefinedFlag.isSelected());
-        });
-
-        // Слушает флаг "Skip empty results" и изменяет соответствующее глобальное состояние.
-        skipEmptyResultsFlag.setOnAction(actionEvent -> {
-            GlobalStates.setShowEmptyResults(!skipEmptyResultsFlag.isSelected());
-        });
-
-        // Слушает выпадающий список с вариатами округления результата и по изменению изменяет соответствющее глобальное состояние.
-        roundingChooser.setOnAction(actionEvent -> {
-            GlobalStates.setRoundingOptional(RoundingOptionals.getByTitle(roundingChooser.getValue()));
-        });
-
-        // По нажатию кнопки 'Start' запускает получение тестов и открытие окна с этими тестами.
-        startButton.setOnAction(event -> {
-            try {
-                Optional<File> selectedFile = currentDirectoryFiles
-                        .stream()
-                        .filter(f -> f.getName().equals(rootDirectoryViewer.getSelectionModel().getSelectedItem()))
-                        .findAny();
-                if (selectedFile.isPresent()) {
-                    FileData fileData = fileService.getDataFromFile(selectedFile.get());
-                    if (fileData.getTestGroups().size() > 0) {
-                        openResultWindow(fileData, selectedFile.get().getName());
-                    }
-                } else {
-                    AlertService.openAlertWindow(GlobalVariables.CHOOSE_FILE_ALERT_MESSAGE);
-                }
-            } catch (Exception ex) {
-                AlertService.openAlertWindow(GlobalVariables.INCORRECT_FILE_DATA_MESSAGE);
-            }
-        });
-
-        // По нажатию кнопки 'Инструкция' открывает окно с инструкцией.
-        instructionButton.setOnAction(actionEvent -> {
-            openInstructionWindow();
-        });
     }
 
-    // Открывает папку путь которой указан в 'folderPathInput'.
+    private void setupListeners() {
+        fileNameInput.textProperty().addListener((ov, oldV, newV) -> filterFilesByQuery(newV));
+        folderPathInput.setOnAction(event -> changeFolderByPath());
+        changeFolderByPathButton.setOnAction(event -> changeFolderByPath());
+        anotherDirectoriesFlag.setOnAction(event -> toggleDirectorySelection(anotherDirectoriesFlag.isSelected()));
+        chooseFolderButton.setOnAction(event -> openDirectoryChooser());
+        skipUserDefinedFlag.setOnAction(event -> GlobalStates.setUserDefined(!skipUserDefinedFlag.isSelected()));
+        skipEmptyResultsFlag.setOnAction(event -> GlobalStates.setShowEmptyResults(!skipEmptyResultsFlag.isSelected()));
+        roundingChooser.setOnAction(event -> GlobalStates.setRoundingOptional(RoundingOptionals.getByTitle(roundingChooser.getValue())));
+        startButton.setOnAction(event -> startFileProcessing());
+        instructionButton.setOnAction(event -> openInstructionWindow());
+    }
+
+    private void loadInitialDirectoryFiles() {
+        rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
+    }
+
+    private void filterFilesByQuery(String query) {
+        List<String> filteredFiles = currentDirectoryFiles.stream()
+                .map(File::getName)
+                .filter(fileName -> fileName.toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        rootDirectoryViewer.setItems(FXCollections.observableArrayList(filteredFiles));
+    }
+
+    private void toggleDirectorySelection(boolean enabled) {
+        chooseFolderButton.setDisable(!enabled);
+        folderPathInput.setDisable(!enabled);
+        changeFolderByPathButton.setDisable(!enabled);
+    }
+
+    private void openDirectoryChooser() {
+        File selectedFolder = directoryChooser.showDialog(getCurrentStage());
+        if (selectedFolder != null) {
+            updateDirectoryFiles(selectedFolder.getAbsolutePath());
+        } else {
+            AlertService.openAlertWindow(GlobalVariables.CHOOSE_DIRECTORY_ALERT_MESSAGE);
+        }
+    }
+
     private void changeFolderByPath() {
         File selectedFolder = new File(folderPathInput.getText());
         if (selectedFolder.exists()) {
-            currentDirectoryFiles.clear();
-            currentDirectoryFiles.addAll(fileService.getFilesByDirectory(folderPathInput.getText()));
-            rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
-        } else  {
+            updateDirectoryFiles(folderPathInput.getText());
+        } else {
             AlertService.openAlertWindow(GlobalVariables.getIncorrectFolderPathMessage(folderPathInput.getText()));
         }
     }
 
-    // Возвращает список имён файлов для отображения в главном окне.
+    private void updateDirectoryFiles(String folderPath) {
+        currentDirectoryFiles = fileService.getFilesByDirectory(folderPath);
+        rootDirectoryViewer.setItems(getFileNamesList(currentDirectoryFiles));
+    }
+
     private ObservableList<String> getFileNamesList(List<File> filesList) {
         return FXCollections.observableArrayList(filesList.stream().map(File::getName).collect(Collectors.toList()));
     }
 
-    // Открывает окно с результатами тестов
+    private void startFileProcessing() {
+        Optional<File> selectedFile = currentDirectoryFiles.stream()
+                .filter(f -> f.getName().equals(rootDirectoryViewer.getSelectionModel().getSelectedItem()))
+                .findFirst();
+        if (selectedFile.isPresent()) {
+            processSelectedFile(selectedFile.get());
+        } else {
+            AlertService.openAlertWindow(GlobalVariables.CHOOSE_FILE_ALERT_MESSAGE);
+        }
+    }
+
+    private void processSelectedFile(File selectedFile) {
+        try {
+            FileData fileData = fileService.getDataFromFile(selectedFile);
+            if (!fileData.getTestGroups().isEmpty()) {
+                openResultWindow(fileData, selectedFile.getName());
+            }
+        } catch (Exception ex) {
+            AlertService.openAlertWindow(GlobalVariables.INCORRECT_FILE_DATA_MESSAGE);
+        }
+    }
+
     private void openResultWindow(FileData fileData, String fileName) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(XMLViewerApplication.class.getResource("test-results.fxml"));
@@ -213,5 +199,8 @@ public class XMLViewerMainController extends Parent {
             e.printStackTrace();
         }
     }
-}
 
+    private Stage getCurrentStage() {
+        return (Stage) rootDirectoryViewer.getScene().getWindow();
+    }
+}

@@ -5,83 +5,82 @@ import ru.white.xml_parser_java.model.LimitComparator;
 import ru.white.xml_parser_java.model.RoundingOptionals;
 import ru.white.xml_parser_java.model.TestResult;
 import ru.white.xml_parser_java.model.UnitOption;
-import ru.white.xml_parser_java.util.*;
+import ru.white.xml_parser_java.util.GlobalStates;
+import ru.white.xml_parser_java.util.GlobalVariables;
+import ru.white.xml_parser_java.util.JsonNodeManager;
+import ru.white.xml_parser_java.util.StatusType;
+import ru.white.xml_parser_java.util.StringManager;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static ru.white.xml_parser_java.util.GlobalVariables.STANDART_DELIMER;
 
 public class TestResultService {
-    // Возвращает список результатов тестов.
+
+    public TestResultService() {
+        // Конструктор для внедрения зависимостей
+    }
+
+    // Возвращает список результатов тестов
     public List<TestResult> getTestResults(JsonNode testResultGroupNode) {
-        List<TestResult> result = new ArrayList<>();
-        JsonNode testResultNodes = testResultGroupNode.get("TestResult");
-        if (testResultNodes != null) {
-            for (JsonNode testResultNode : JsonNodeManager.separateUnitedNodes(testResultNodes)) {
-                TestResult testResult = new TestResult();
-                testResult.setName(StringManager.removeQuotes(String.valueOf(testResultNode.get("name"))));
-                testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultNode))).getRussianTranslation()); // Статус из родительского узла
-                testResult.setValue(getValue(testResultNode));
-                testResult.setUnitValue(testResult.getValue());
-                testResult.setUnitOption(UnitOption.Стандарт);
-                // Получает сначала двойной лимит значений потом, если он не определён пробует получить одиночный.
-                String limits = getLimits(testResultNode);
-                if (limits.equals(GlobalVariables.VALID_VALUES_UNDEFINED)) {
-                    limits = getSingleLimit(testResultNode);
-                }
-                testResult.setValidValues(limits);
-                result.add(testResult);
+        JsonNode testResultNodes = testResultGroupNode.path("TestResult");
+        return JsonNodeManager.separateUnitedNodes(testResultNodes).stream()
+                .map(this::createTestResult)
+                .collect(Collectors.toList());
+    }
+
+    // Возвращает список результатов тестов из узла SessionAction
+    public List<TestResult> getTestResultsFromSessionAction(JsonNode testResultGroupNode) {
+        List<TestResult> results = new ArrayList<>();
+        JsonNode dataNode = testResultGroupNode.path("Data");
+        if (dataNode != null) {
+            String stepType = testResultGroupNode.path("Extension").path("TSStepProperties").path("StepType").asText();
+            if ("Statement".equals(stepType) || "Action".equals(stepType)) {
+                JsonNode collectionNode = dataNode.path("Collection").path("Item");
+                JsonNodeManager.separateUnitedNodes(collectionNode).forEach(itemNode -> {
+                    TestResult result = new TestResult();
+                    result.setName(StringManager.removeQuotes(itemNode.path("name").asText()));
+                    result.setStatus(StatusType.fromString(JsonNodeManager.getStatus(testResultGroupNode)).getRussianTranslation());
+                    result.setValue(getValueFromDatum(itemNode));
+                    result.setUnitValue(result.getValue());
+                    result.setUnitOption(UnitOption.Стандарт);
+                    result.setValidValues(GlobalVariables.VALID_VALUES_UNDEFINED);
+                    results.add(result);
+                });
             }
         }
-        return result;
+        return results;
     }
+
+    // Создает объект TestResult из JsonNode
+    private TestResult createTestResult(JsonNode testResultNode) {
+        TestResult testResult = new TestResult();
+        testResult.setName(StringManager.removeQuotes(testResultNode.path("name").asText()));
+        testResult.setStatus(StatusType.fromString(JsonNodeManager.getStatus(testResultNode)).getRussianTranslation());
+        testResult.setValue(getValue(testResultNode));
+        testResult.setUnitValue(testResult.getValue());
+        testResult.setUnitOption(UnitOption.Стандарт);
+        String limits = getLimits(testResultNode).orElseGet(() -> getSingleLimit(testResultNode).orElse(GlobalVariables.VALID_VALUES_UNDEFINED));
+        testResult.setValidValues(limits);
+        return testResult;
+    }
+
     // Возвращает значение результата теста, округлённое согласно глобальному состоянию 'roundingOptional'
     private String getValue(JsonNode testResultNode) {
-        try {
-            String stringValue = StringManager.removeQuotes(String.valueOf(testResultNode.get("TestData").get("Datum").get("value")));
-            return getRoundedValue(stringValue);
-
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-    public List<TestResult> getTestResultsFromSessionAction(JsonNode testResultGroupNode) {
-        List<TestResult> result = new ArrayList<>();
-        JsonNode testResultNodes = testResultGroupNode.get("Data");
-        if (testResultNodes != null) {
-            String state = testResultGroupNode.get("Extension").get("TSStepProperties").get("StepType").asText();
-            if (state.equals("Statement") || state.equals("Action")) {
-                JsonNode collectionNode = testResultNodes.get("Collection");
-                if (collectionNode != null) {
-                    for (JsonNode itemNode : JsonNodeManager.separateUnitedNodes(collectionNode.get("Item"))) {
-                        TestResult testResult = new TestResult();
-
-                        testResult.setName(StringManager.removeQuotes(String.valueOf(itemNode.get("name"))));
-                        testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation()); // Статус из родительского узла
-                        testResult.setValue(getValueFromDatum(itemNode));
-                        testResult.setUnitValue(testResult.getValue());
-                        testResult.setUnitOption(UnitOption.Стандарт);
-                        testResult.setValidValues(GlobalVariables.VALID_VALUES_UNDEFINED); // Лимиты не указаны в данном случае
-                        result.add(testResult);
-
-                    }
-                }
-            }
-        }
-        return result; // Возвращаем результат для Data узла
+        String value = StringManager.removeQuotes(testResultNode.path("TestData").path("Datum").path("value").asText());
+        return getRoundedValue(value);
     }
 
     // Возвращает значение из узла Datum для структуры Data
     private String getValueFromDatum(JsonNode itemNode) {
-        String stringValue = StringManager.removeQuotes(String.valueOf(itemNode.get("Datum").get("value")));
-        return getRoundedValue(stringValue);
+        String value = StringManager.removeQuotes(itemNode.path("Datum").path("value").asText());
+        return getRoundedValue(value);
     }
 
-    // Парсит строку, округляет согласно глобальному состоянию 'roundingOptional' и возвращает значение.
+    // Округляет значение в зависимости от глобального состояния
     private String getRoundedValue(String value) {
         if (!GlobalStates.getRoundingOptional().equals(RoundingOptionals.NO_ROUND)) {
             try {
@@ -97,9 +96,9 @@ public class TestResultService {
                     case THREE_DOWN:
                         return String.valueOf(bigDecimal.setScale(3, BigDecimal.ROUND_DOWN));
                     default:
-                        return String.valueOf(doubleValue);
+                        return value;
                 }
-            } catch (Exception ex) {
+            } catch (NumberFormatException e) {
                 return value;
             }
         } else {
@@ -107,37 +106,34 @@ public class TestResultService {
         }
     }
 
-    // Возвращает диапазон допустимых значений результата теста, если он указан.
-    private String getLimits(JsonNode testResultNode) {
+    // Возвращает диапазон допустимых значений результата теста, если он указан
+    private Optional<String> getLimits(JsonNode testResultNode) {
         try {
-            ArrayList<String> limitItems = new ArrayList<>();
-            JsonNode limitsNode = testResultNode.get("TestLimits").get("Limits").get("LimitPair").get("Limit");
-            for (JsonNode limitItem : limitsNode) {
-                limitItems.add(StringManager.removeQuotes(String.valueOf(limitItem.get("Datum").get("value"))));
+            List<String> limitItems = JsonNodeManager.separateUnitedNodes(testResultNode.path("TestLimits").path("Limits").path("LimitPair").path("Limit"))
+                    .stream()
+                    .map(limitItem -> StringManager.removeQuotes(limitItem.path("Datum").path("value").asText()))
+                    .collect(Collectors.toList());
+            if (limitItems.size() >= 2) {
+                return Optional.of(limitItems.get(0) + GlobalVariables.STANDART_DELIMER + limitItems.get(1));
             }
-            return limitItems.get(0) + STANDART_DELIMER + limitItems.get(1);
-        } catch (Exception ex) {
-            return GlobalVariables.VALID_VALUES_UNDEFINED;
+        } catch (Exception e) {
+            // Ignore exceptions and return empty Optional
         }
+        return Optional.empty();
     }
 
-
-    // Возвращает одиночный предел результата теста если он указан.
-    private String getSingleLimit(JsonNode testResultNode) {
+    // Возвращает одиночный предел результата теста, если он указан
+    private Optional<String> getSingleLimit(JsonNode testResultNode) {
         try {
-            JsonNode limitsNode = testResultNode.get("TestLimits").get("Limits").get("SingleLimit");
-            Optional<LimitComparator> optComparator = LimitComparator.getByStringValue(String.valueOf(limitsNode.get("comparator")));
-            String viewComparator;
-            if (optComparator.isPresent()) {
-                viewComparator = optComparator.get().getViewValue();
-            } else {
-                viewComparator = "";
-            }
-            return viewComparator + " " + StringManager.removeQuotes(String.valueOf(limitsNode.get("Datum").get("value")));
-
-        } catch (Exception ex) {
-            return GlobalVariables.VALID_VALUES_UNDEFINED;
+            JsonNode singleLimitNode = testResultNode.path("TestLimits").path("Limits").path("SingleLimit");
+            String comparator = LimitComparator.getByStringValue(singleLimitNode.path("comparator").asText())
+                    .map(LimitComparator::getViewValue)
+                    .orElse("");
+            String value = StringManager.removeQuotes(singleLimitNode.path("Datum").path("value").asText());
+            return Optional.of(comparator + " " + value);
+        } catch (Exception e) {
+            // Ignore exceptions and return empty Optional
         }
+        return Optional.empty();
     }
 }
-

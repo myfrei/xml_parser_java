@@ -7,6 +7,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class AlertController {
+
     private final String message;
 
     public AlertController(String message) {
@@ -14,21 +15,28 @@ public class AlertController {
     }
 
     @FXML
-    private Text text;
+    private Text alertText;
 
     @FXML
-    private Button button;
+    private Button closeButton;
 
     @FXML
     public void initialize() {
-        // Отображает по центру переданное сообщение.
-        text.setText(message);
-        text.setTextAlignment(TextAlignment.CENTER);
+        setupAlertMessage();
+        setupCloseButton();
+    }
 
-        // По нажатию кнопки окно закрывается.
-        button.setOnAction(event -> {
-            Stage stage = (Stage) button.getScene().getWindow();
-            stage.close();
-        });
+    private void setupAlertMessage() {
+        alertText.setText(message);
+        alertText.setTextAlignment(TextAlignment.CENTER);
+    }
+
+    private void setupCloseButton() {
+        closeButton.setOnAction(event -> closeWindow());
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 }
