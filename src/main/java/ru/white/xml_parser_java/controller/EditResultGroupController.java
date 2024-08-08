@@ -2,8 +2,8 @@ package ru.white.xml_parser_java.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import ru.white.xml_parser_java.model.TestResultGroup;
@@ -12,11 +12,6 @@ public class EditResultGroupController {
 
     private final TestResultGroup testResultGroup;
     private final HBox hBox;
-
-    public EditResultGroupController(TestResultGroup testResultGroup, HBox hBox) {
-        this.testResultGroup = testResultGroup;
-        this.hBox = hBox;
-    }
 
     @FXML
     private TextField nameInput;
@@ -30,32 +25,45 @@ public class EditResultGroupController {
     @FXML
     private Button submitButton;
 
+    public EditResultGroupController(TestResultGroup testResultGroup, HBox hBox) {
+        this.testResultGroup = testResultGroup;
+        this.hBox = hBox;
+    }
+
     @FXML
     public void initialize() {
-        // Инпуты заполняются значениями из группы результатов теста.
+        populateInputs();
+        setupEventHandlers();
+    }
+
+    private void populateInputs() {
         nameInput.setText(testResultGroup.getName());
         statusInput.setText(testResultGroup.getStatus());
+    }
 
-        // По нажатию 'cancelButton' окно закрывается, изменения пропадают.
-        cancelButton.setOnAction(event -> {
-            Stage stage = (Stage) cancelButton.getScene().getWindow();
-            stage.close();
-        });
+    private void setupEventHandlers() {
+        cancelButton.setOnAction(event -> closeWindow());
+        submitButton.setOnAction(event -> handleSubmit());
+    }
 
-        // По нажатию 'submitButton' меняет значения как в результирующем списке (в данном случае это testResult),
-        // так и в отображении (hBox). После этого окно редактирования закрывается.
-        submitButton.setOnAction(actionEvent -> {
-            testResultGroup.setName(nameInput.getText());
-            Label treeViewLabel = (Label) hBox.getChildren().get(0);
-            treeViewLabel.setText(nameInput.getText());
+    private void closeWindow() {
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
+        stage.close();
+    }
 
-            testResultGroup.setStatus(statusInput.getText());
-            Label statusLabel = (Label) hBox.getChildren().get(1);
-            statusLabel.setText(statusInput.getText());
+    private void handleSubmit() {
+        updateTestResultGroup();
+        updateUI();
+        closeWindow();
+    }
 
-            Stage stage = (Stage) submitButton.getScene().getWindow();
-            stage.close();
-        });
+    private void updateTestResultGroup() {
+        testResultGroup.setName(nameInput.getText());
+        testResultGroup.setStatus(statusInput.getText());
+    }
+
+    private void updateUI() {
+        ((Label) hBox.getChildren().get(0)).setText(testResultGroup.getName());
+        ((Label) hBox.getChildren().get(1)).setText(testResultGroup.getStatus());
     }
 }
-

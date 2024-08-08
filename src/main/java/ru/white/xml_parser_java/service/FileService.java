@@ -1,6 +1,5 @@
 package ru.white.xml_parser_java.service;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import ru.white.xml_parser_java.model.FileData;
@@ -17,50 +16,50 @@ import java.util.stream.Collectors;
 
 public class FileService {
 
+    private final XmlMapper xmlMapper;
+    private final TestGroupService testGroupService;
+
+    public FileService(XmlMapper xmlMapper, TestGroupService testGroupService) {
+        this.xmlMapper = xmlMapper;
+        this.testGroupService = testGroupService;
+    }
+
     // Возвращает список .xml файлов из директории по переданному пути.
     public List<File> getFilesByDirectory(String folderPath) {
-        List<File> result = new ArrayList<>();
         File folder = new File(folderPath);
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().contains(".xml")) {
-                    result.add(file);
-                }
-            }
-        }
-        return result;
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".xml"));
+        return files != null ? List.of(files) : new ArrayList<>();
     }
 
     // Возвращает данные из .xml файла.
     public FileData getDataFromFile(File file) {
-        FileData result = new FileData();
-        List<TestGroup> testGroups = new ArrayList<>();
-        XmlMapper mapper = new XmlMapper();
-
+        FileData fileData = new FileData();
         try {
-            JsonNode resultSet = mapper.readTree(file).get("TestResults").get("ResultSet");
-            // Получает дату теста.
-            String dateString = String.valueOf(resultSet.get("startDateTime")).replaceAll("\"", "").split("T")[0];
-            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            result.setDate(date);
-            // Получает результаты тестов.
-            GlobalVariables.TARGET_TESTS_TAG_NAMES.forEach(tagName -> {
-                JsonNode currentTagNode = resultSet.get(tagName);
-                if (currentTagNode != null) {
-                    TestGroupService testGroupService = new TestGroupService();
-                    List<TestGroup> tests = testGroupService.getTestGroupsByTagName(currentTagNode);
-                    if (!tests.isEmpty()) {
-                        testGroups.addAll(tests);
-                    }
-                }
-            });
+            JsonNode rootNode = xmlMapper.readTree(file);
+            JsonNode resultSet = rootNode.path("TestResults").path("ResultSet");
+
+            LocalDate date = parseDate(resultSet.path("startDateTime").asText());
+            fileData.setDate(date);
+
+            List<TestGroup> testGroups = GlobalVariables.TARGET_TESTS_TAG_NAMES.stream()
+                    .map(tagName -> resultSet.path(tagName))
+                    .filter(JsonNode::isContainerNode)
+                    .flatMap(tagNode -> testGroupService.getTestGroupsByTagName(tagNode).stream())
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            fileData.setTestGroups(testGroups);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return fileData;
+    }
 
-        result.setTestGroups(testGroups.stream().sorted().collect(Collectors.toList()));
-        return result;
+    private LocalDate parseDate(String dateString) {
+        if (dateString == null || dateString.isEmpty()) {
+            return null;
+        }
+        String[] dateParts = dateString.split("T")[0].split("-");
+        return LocalDate.parse(String.join("-", dateParts), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 }
-

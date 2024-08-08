@@ -12,66 +12,73 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestResultGroupService {
-    // Возвращает группы результатов теста.
+
+    private final TestResultService testResultService;
+    private final GraphService graphService;
+
+    public TestResultGroupService(TestResultService testResultService, GraphService graphService) {
+        this.testResultService = testResultService;
+        this.graphService = graphService;
+    }
+
+    // Возвращает группы результатов теста
     public List<TestResultGroup> getTestResultGroups(JsonNode testNode) {
-        List<TestResultGroup> result = new ArrayList<>();
+        List<TestResultGroup> testResultGroups = new ArrayList<>();
         GlobalVariables.TARGET_TESTS_TAG_NAMES.forEach(tagName -> {
-            JsonNode testResultGroupsNode = testNode.get(tagName);
+            JsonNode testResultGroupsNode = testNode.path(tagName);
             if (testResultGroupsNode != null) {
-                for (JsonNode testResultGroupNode : JsonNodeManager.separateUnitedNodes(testResultGroupsNode)) {
-                    TestResultGroup testResultGroup = new TestResultGroup();
-                    // Присвоение имени группе результатов.
-                    if (testResultGroupNode.get("callerName") != null) {
-                        testResultGroup.setName(StringManager.removeQuotes(String.valueOf(testResultGroupNode.get("callerName"))));
-                    } else {
-                        testResultGroup.setName(StringManager.removeQuotes(String.valueOf(testResultGroupNode.get("name"))));
+                JsonNodeManager.separateUnitedNodes(testResultGroupsNode).forEach(testResultGroupNode -> {
+                    TestResultGroup testResultGroup = createTestResultGroup(testResultGroupNode);
+                    if (!testResultGroup.getResults().isEmpty() || testResultGroup.getGraph() != null) {
+                        testResultGroups.add(testResultGroup);
                     }
-                    // Присвоение статуса группе результатов.
-                    testResultGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation());
-                    // Флаг 'selected' устанавливается в активное положение. (чекбокс в табице выбран)
-                    testResultGroup.setSelected(true);
-                    // Получение результатов и присвоение их группе.
-                    TestResultService testResultService = new TestResultService();
-                    testResultGroup.setResults(testResultService.getTestResults(testResultGroupNode));
-                   // System.out.println(testResultGroup);
-
-                    // Проверяет есть ли у группы результатов график. Строит и присваивает его если он есть.
-                    if (testResultGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
-                        GraphService graphService = new GraphService();
-                        testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));
-                    }
-
-                    if (testResultGroup.getResults().isEmpty() && testResultGroup.getGraph() == null) {
-                        testResultGroup.setResults(testResultService.getTestResultsFromSessionAction(testResultGroupNode));
-                    }
-                    // Добавление группы результатов в результирующий список.
-                    result.add(testResultGroup);
-                }
+                });
             }
         });
-        //return mergeSameNamesTestResultGroups(result);
-        return result;
+        return mergeSameNamesTestResultGroups(testResultGroups);
     }
 
-    // Объединяет группы результатов с одинаковыми именами.
+    private TestResultGroup createTestResultGroup(JsonNode testResultGroupNode) {
+        TestResultGroup testResultGroup = new TestResultGroup();
+        setTestResultGroupName(testResultGroup, testResultGroupNode);
+        testResultGroup.setStatus(StatusType.fromString(JsonNodeManager.getStatus(testResultGroupNode)).getRussianTranslation());
+        testResultGroup.setSelected(true);
+
+        List<TestResult> testResults = testResultService.getTestResults(testResultGroupNode);
+        if (testResults.isEmpty()) {
+            testResults = testResultService.getTestResultsFromSessionAction(testResultGroupNode);
+        }
+        testResultGroup.setResults(testResults);
+
+        if (testResultGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
+            testResultGroup.setGraph(graphService.getGraph(testResultGroupNode));
+        }
+
+        return testResultGroup;
+    }
+
+    private void setTestResultGroupName(TestResultGroup testResultGroup, JsonNode testResultGroupNode) {
+        String name = StringManager.removeQuotes(testResultGroupNode.path("callerName").asText());
+        if (name == null || name.isEmpty()) {
+            name = StringManager.removeQuotes(testResultGroupNode.path("name").asText());
+        }
+        testResultGroup.setName(name);
+    }
+
+    // Объединяет группы результатов с одинаковыми именами
     public List<TestResultGroup> mergeSameNamesTestResultGroups(List<TestResultGroup> testResultGroups) {
-        List<TestResultGroup> result = new ArrayList<>();
-        for (TestResultGroup testResultGroup : testResultGroups) {
-            TestResultGroup sameTestResultGroup = result
-                    .stream()
-                    .filter(trg -> trg.getName().equals(testResultGroup.getName()))
+        List<TestResultGroup> mergedGroups = new ArrayList<>();
+        testResultGroups.forEach(testResultGroup -> {
+            TestResultGroup existingGroup = mergedGroups.stream()
+                    .filter(group -> group.getName().equals(testResultGroup.getName()))
                     .findFirst()
                     .orElse(null);
-            if (sameTestResultGroup == null) {
-                result.add(testResultGroup);
+            if (existingGroup == null) {
+                mergedGroups.add(testResultGroup);
             } else {
-                List<TestResult> newTestResultList = new ArrayList<>();
-                newTestResultList.addAll(sameTestResultGroup.getResults());
-                newTestResultList.addAll(testResultGroup.getResults());
-                sameTestResultGroup.setResults(newTestResultList);
+                existingGroup.getResults().addAll(testResultGroup.getResults());
             }
-        }
-        return result;
+        });
+        return mergedGroups;
     }
 }
-

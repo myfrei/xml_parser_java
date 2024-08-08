@@ -7,22 +7,33 @@ import javafx.stage.Stage;
 import ru.white.xml_parser_java.util.GlobalVariables;
 
 public class InstructionController {
-    @FXML
-    private TextArea textArea;
 
     @FXML
-    private Button button;
+    private TextArea instructionTextArea;
+
+    @FXML
+    private Button closeButton;
+
+    public InstructionController() {
+    }
 
     @FXML
     public void initialize() {
-        // Заполняет textArea текстом инструкции.
-        textArea.setText(GlobalVariables.INSTRUCTION_TEXT);
-        textArea.setWrapText(true);
+        setupInstructionText();
+        setupCloseButton();
+    }
 
-        // По нажатию кнопки окно закрывается.
-        button.setOnAction(event -> {
-            Stage stage = (Stage) button.getScene().getWindow();
-            stage.close();
-        });
+    private void setupInstructionText() {
+        instructionTextArea.setText(GlobalVariables.INSTRUCTION_TEXT);
+        instructionTextArea.setWrapText(true);
+    }
+
+    private void setupCloseButton() {
+        closeButton.setOnAction(event -> closeWindow());
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
     }
 }

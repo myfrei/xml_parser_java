@@ -1,86 +1,82 @@
 package ru.white.xml_parser_java.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import ru.white.xml_parser_java.model.Test;
 import ru.white.xml_parser_java.model.TestResultGroup;
 import ru.white.xml_parser_java.util.GlobalVariables;
 import ru.white.xml_parser_java.util.JsonNodeManager;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import ru.white.xml_parser_java.util.StatusType;
 import ru.white.xml_parser_java.util.StringManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public class TestService {
 
-    // Возвращает список тестов.
+    private final TestResultGroupService testResultGroupService;
+
+    public TestService(TestResultGroupService testResultGroupService) {
+        this.testResultGroupService = testResultGroupService;
+    }
+
+    // Возвращает список тестов по тегу
     public List<Test> getTestByTagName(JsonNode node) {
-        List<Test> result = new ArrayList<>();
-        for (JsonNode testGroupNode : JsonNodeManager.separateUnitedNodes(node)) {
-            getTestByNode(testGroupNode).ifPresent(result::add);
-        }
-        return result;
+        List<Test> tests = new ArrayList<>();
+        JsonNodeManager.separateUnitedNodes(node).forEach(testNode -> {
+            getTestByNode(testNode).ifPresent(tests::add);
+        });
+        return tests;
     }
 
-    // Возвращает тест
+    // Возвращает тест на основе JsonNode
     private Optional<Test> getTestByNode(JsonNode testNode) {
-        Test result = new Test();
-        try {
-            if (checkTestOutcomeStatus(testNode)) {
-                // Присвоение имени тесту.
-                if (testNode.get("callerName") != null) {
-                    result.setName(StringManager.removeQuotes(String.valueOf(testNode.get("callerName"))));
-                } else {
-                    result.setName(StringManager.removeQuotes(String.valueOf(testNode.get("name"))));
-                }
-                // Получение результатов и присвоение их текущему тесту.
-                TestResultGroupService testResultService = new TestResultGroupService();
-                List<TestResultGroup> results = testResultService.getTestResultGroups(testNode);
-                // Если у теста нет результатов, создаётся специальный один результат помеченный флагом 'single',
-                // потом такие результаты будут объединены в один общий тест.
-                if (results.isEmpty()) {
-                    TestResultGroup singleGroup = new TestResultGroup();
-                    TestResultService singleTestResulService = new TestResultService();
-                    singleGroup.setName(result.getName());
-                    singleGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testNode))).getRussianTranslation());
-                    singleGroup.setResults(singleTestResulService.getTestResults(testNode));
-                    singleGroup.setSelected(true);
-                    singleGroup.setEmpty(singleGroup.getResults().isEmpty());
-                    results.add(singleGroup);
-                    if (singleGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
-                        GraphService graphService = new GraphService();
-                        singleGroup.setGraph(graphService.getGraph(testNode));
-                    }
-                    if (singleGroup.getResults().isEmpty() && singleGroup.getGraph() == null) {
-                        singleGroup.setResults(singleTestResulService.getTestResultsFromSessionAction(testNode));
-                    }
-                }
-                result.setResultGroups(results);
-                return Optional.of(result);
+        if (isValidTest(testNode)) {
+            Test test = new Test();
+            setTestName(test, testNode);
+
+            List<TestResultGroup> resultGroups = testResultGroupService.getTestResultGroups(testNode);
+            if (resultGroups.isEmpty()) {
+                addEmptyTestResultGroup(test, testNode);
             } else {
-                return Optional.empty();
+                test.setResultGroups(resultGroups);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Optional.empty();
+            return Optional.of(test);
         }
+        return Optional.empty();
     }
 
-    // Проверяет статус теста.
-    private boolean checkTestOutcomeStatus(JsonNode testGroupNode) {
-        JsonNode jsonNode = testGroupNode.get("Outcome");
-        String outcomeStatus;
-        if (jsonNode != null) {
-            outcomeStatus = String.valueOf(jsonNode.get("value")).replaceAll("\"", "");
-        } else {
-            outcomeStatus = String.valueOf(testGroupNode.get("ActionOutcome").get("value")).replaceAll("\"", "");
+    // Устанавливает имя теста
+    private void setTestName(Test test, JsonNode testNode) {
+        String name = StringManager.removeQuotes(testNode.path("callerName").asText());
+        if (name.isEmpty()) {
+            name = StringManager.removeQuotes(testNode.path("name").asText());
         }
-        return outcomeStatus.equals("Passed")
-                || outcomeStatus.equals("Done")
-                || outcomeStatus.equals("Failed");
+        test.setName(name);
+    }
+
+    // Добавляет пустую группу результатов теста
+    private void addEmptyTestResultGroup(Test test, JsonNode testNode) {
+        TestResultGroup emptyGroup = new TestResultGroup();
+        emptyGroup.setName(test.getName());
+        emptyGroup.setStatus(StatusType.fromString(JsonNodeManager.getStatus(testNode)).getRussianTranslation());
+        emptyGroup.setResults(testResultGroupService.getTestResultGroups(testNode).getFirst().getResults());
+        emptyGroup.setSelected(true);
+        emptyGroup.setEmpty(emptyGroup.getResults().isEmpty());
+
+        if (emptyGroup.getName().contains(GlobalVariables.GRAPH_NODE_NAME)) {
+            emptyGroup.setGraph(testResultGroupService.getTestResultGroups(testNode).getFirst().getGraph());
+        }
+
+        test.setResultGroups(List.of(emptyGroup));
+    }
+
+    // Проверяет валидность теста
+    private boolean isValidTest(JsonNode testNode) {
+        String outcomeStatus = testNode.path("Outcome").path("value").asText();
+        if (outcomeStatus.isEmpty()) {
+            outcomeStatus = testNode.path("ActionOutcome").path("value").asText();
+        }
+        return outcomeStatus.equals("Passed") || outcomeStatus.equals("Done") || outcomeStatus.equals("Failed");
     }
 }
-
