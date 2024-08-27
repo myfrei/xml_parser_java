@@ -23,6 +23,7 @@ public class TestResultService {
             for (JsonNode testResultNode : JsonNodeManager.separateUnitedNodes(testResultNodes)) {
                 TestResult testResult = new TestResult();
                 testResult.setName(StringManager.removeQuotes(String.valueOf(testResultNode.get("name"))));
+                testResult.setStageType(StringManager.getStateType(testResultNode));
                 testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultNode))).getRussianTranslation()); // Статус из родительского узла
                 testResult.setValue(getValue(testResultNode));
                 testResult.setUnitValue(testResult.getValue());
@@ -61,6 +62,7 @@ public class TestResultService {
                         TestResult testResult = new TestResult();
 
                         testResult.setName(StringManager.removeQuotes(String.valueOf(itemNode.get("name"))));
+                        testResult.setStageType(StringManager.getStateType(itemNode));
                         testResult.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation()); // Статус из родительского узла
                         testResult.setValue(getValueFromDatum(itemNode));
                         testResult.setUnitValue(testResult.getValue());

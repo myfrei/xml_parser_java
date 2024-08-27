@@ -26,6 +26,7 @@ public class TestResultGroupService {
                     } else {
                         testResultGroup.setName(StringManager.removeQuotes(String.valueOf(testResultGroupNode.get("name"))));
                     }
+                    testResultGroup.setStageType(StringManager.getStateType(testResultGroupNode));
                     // Присвоение статуса группе результатов.
                     testResultGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testResultGroupNode))).getRussianTranslation());
                     // Флаг 'selected' устанавливается в активное положение. (чекбокс в табице выбран)

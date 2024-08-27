@@ -12,6 +12,15 @@ public class TestResultGroup {
     private LineChart<Number, Number> graph;
     private boolean selected;
     private boolean empty;
+    private String stageType;
+
+    public String getStageType() {
+        return stageType;
+    }
+
+    public void setStageType(String stageType) {
+        this.stageType = stageType;
+    }
 
     public String getName() {
         return name;
@@ -72,6 +81,7 @@ public class TestResultGroup {
                 ", results=" + results +
                 ", graph=" + graph +
                 ", selected=" + selected +
+                ", stageType=" + stageType +
                 ", empty=" + empty +
                 '}';
     }

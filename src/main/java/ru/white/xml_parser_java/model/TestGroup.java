@@ -5,11 +5,21 @@ import java.util.List;
 public class TestGroup implements Comparable<TestGroup> {
     private String name;
     private String originName;
+    private String stageType;
+
+    public String getStageType() {
+        return stageType;
+    }
+
+    public void setStageType(String stageType) {
+        this.stageType = stageType;
+    }
 
     @Override
     public String toString() {
         return "TestGroup{" +
                 "name='" + name + '\'' +
+                ", stageType=" + stageType +
                 ", tests=" + tests +
                 '}';
     }

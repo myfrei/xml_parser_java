@@ -18,7 +18,14 @@ public class TexExportService {
     public void exportToTEX(List<TestGroup> testGroups, LocalDate date, String folderPath) {
         String fileName = "export_" + date.toString() + ".tex";
         String filePath = folderPath + "/" + fileName;
+        //System.out.println(testGroups);
 
+//        List<Test> tests = testGroups.get(0).getTests();
+//        tests.stream().forEach(x -> {
+//            System.out.println(x.getName());
+//            System.out.println(x.getResultGroups());
+//            System.out.println("______");
+//        });
         try (FileWriter writer = new FileWriter(filePath)) {
             StringBuilder texContent = new StringBuilder();
             for (TestGroup testGroup : testGroups) {
@@ -35,114 +42,138 @@ public class TexExportService {
         sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:  \\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
 
 
-        //TODO добавить StepType и использовать его в tex
         sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
         sb.append("\t%% set prec = 1\n\n");
 
-        //TODO дописать waveform для графиков
-        // Сеттеры для всех возможных значений
-        Set<String> uniqueSetters = new HashSet<>();
+        // Хранение всех уникальных переменных
         Set<String> passFailTestSet = new HashSet<>();
-        Set<String> actionSet = new HashSet<>();
-        Set<String> statementSet = new HashSet<>();
-        //TODO limits если есть диапазон и values если нет дипазона
-        //TODO если одно вложение не писать его оставлять только values если больше 1 вложения название+values
-        //TODO если нет value должно быть exist в конце
-        for (Test test : testGroup.getTests()) {
-            for (TestResultGroup resultGroup : test.getResultGroups()) {
-                uniqueSetters.addAll(formatSetters(resultGroup));
-                collectPassFailTests(passFailTestSet, resultGroup);
-            }
-        }
-
-        for (String setter : uniqueSetters) {
-            sb.append(setter);
-        }
-
-        sb.append("\n\t%% set substeps = e.get_substeps(step, 'SequenceCall', 'Main') \n");
-        sb.append("\t%% for substep in substeps\n");
-        sb.append("\t\t%% set substep_name = e.get_step_name(substep)\n");
-
-        // Добавление всех PassFailTest подшагов единожды
-        for (String passFailTest : passFailTestSet) {
-            sb.append(passFailTest);
-        }
+        Set<String> numericLimitSet = new HashSet<>();
+        Set<String> actionValuesSet = new HashSet<>();
+        Set<String> statementValuesSet = new HashSet<>();
+        Set<String> waveformSet = new HashSet<>();
 
         for (Test test : testGroup.getTests()) {
             for (TestResultGroup resultGroup : test.getResultGroups()) {
-                sb.append(formatSubsteps(resultGroup, test.getName(), actionSet, statementSet));
+                String baseName = formatName(resultGroup.getName());
+
+                switch (resultGroup.getStageType()) {
+                    case "PassFailTest":
+                        passFailTestSet.add(baseName + "_exists");
+                        break;
+                    case "NumericLimitTest":
+                        for (TestResult result : resultGroup.getResults()) {
+                            numericLimitSet.add(baseName + "_" + formatName(result.getName()) + "_limits");
+                        }
+                        break;
+                    case "NI_MultipleNumericLimitTest":
+                        for (TestResult result : resultGroup.getResults()) {
+                            numericLimitSet.add(baseName + "_" + formatName(result.getName()) + "_limits");
+                        }
+                        break;
+                    case "Action":
+                        for (TestResult result : resultGroup.getResults()) {
+                            actionValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
+                        }
+                        break;
+                    case "Statement":
+                        for (TestResult result : resultGroup.getResults()) {
+                            statementValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
+                        }
+                        break;
+                }
+
+                if (resultGroup.getGraph() != null) {
+                    waveformSet.add(baseName + "_waveform");
+                }
             }
+
         }
 
-        sb.append("\t%% endfor\n");
+        // Объявляем переменные как пустые списки
+        declareVariables(sb, passFailTestSet);
+        declareVariables(sb, numericLimitSet);
+        declareVariables(sb, actionValuesSet);
+        declareVariables(sb, statementValuesSet);
+        declareVariables(sb, waveformSet);
+
+        // Заполняем переменные данными
+        appendTestStatus(sb, passFailTestSet, "PassFailTest");
+        appendActionValues(sb, actionValuesSet);
+        appendStatementValues(sb, statementValuesSet);
+        appendNumericLimits(sb, numericLimitSet);
+        appendWaveforms(sb, waveformSet);
+
+        sb.append("\t%% print(decimate_graph_rs_transmite_waveform)\n");
         sb.append("%% endif\n");
 
         return sb.toString();
     }
 
-    private void collectPassFailTests(Set<String> passFailTestSet, TestResultGroup resultGroup) {
-        if (resultGroup.getName().equals("Check TM") || resultGroup.getName().equals("Set Voltages")) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("\t\t%% set substeps_PassFailTest = e.get_substeps(substep, 'PassFailTest', 'Main')\n");
-            if (resultGroup.getName().equals("Check TM")) {
-                sb.append("\t\t%% set _ = check_tm_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, 'Check TM'))\n");
-            } else if (resultGroup.getName().equals("Set Voltages")) {
-                sb.append("\t\t%% set _ = set_voltages_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, 'Set Voltages'))\n");
-            }
-            passFailTestSet.add(sb.toString());
+    private void declareVariables(StringBuilder sb, Set<String> variables) {
+        for (String var : variables) {
+            sb.append("\t%% set ").append(var).append(" = []\n");
         }
     }
 
-    private Set<String> formatSetters(TestResultGroup resultGroup) {
-        Set<String> setters = new HashSet<>();
-        String baseName = resultGroup.getName().toLowerCase().replaceAll("[^a-z0-9]", "_");
-        setters.add("\t%% set " + baseName + "_exists = []\n");
-        if (resultGroup.getResults().isEmpty()) {
-            setters.add("\t%% set " + baseName + "_limits = []\n");
-        } else {
-            for (TestResult result : resultGroup.getResults()) {
-                setters.add("\t%% set " + baseName + "_" + result.getName().toLowerCase().replaceAll("[^a-z0-9]", "_") + "_values = []\n");
+    private void appendTestStatus(StringBuilder sb, Set<String> passFailTestSet, String testType) {
+        if (!passFailTestSet.isEmpty()) {
+            sb.append("\t%% set substeps_").append(testType).append(" = e.get_substeps(step, '").append(testType).append("', 'Main')\n");
+            for (String var : passFailTestSet) {
+                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_test_status_by_name(substeps_").append(testType).append(", '")
+                        .append(extractTestName(var)).append("'))\n");
             }
         }
-        return setters;
     }
 
-    private String formatSubsteps(TestResultGroup resultGroup, String testName, Set<String> actionSet, Set<String> statementSet) {
-        StringBuilder sb = new StringBuilder();
-        String baseName = resultGroup.getName().toLowerCase().replaceAll("[^a-z0-9]", "_");
-
-        if (resultGroup.getResults().isEmpty()) {
-            String passFailTest = "\t\t%% set substeps_PassFailTest = e.get_substeps(substep, 'PassFailTest', 'Main')\n" +
-                    "\t\t%% set _ = " + baseName + "_exists.extend(e.get_test_status_by_name(substeps_PassFailTest, '" + resultGroup.getName() + "'))\n";
-            if (!actionSet.contains(passFailTest)) {
-                sb.append(passFailTest);
-                actionSet.add(passFailTest);
-            }
-        } else {
-            String actionStep = "\t\t%% set substeps_Action = e.get_substeps(substep, 'Action', 'Main')\n" +
-                    "\t\t%% set _ = " + baseName + "_exists.extend(e.get_test_status_by_name(substeps_Action, '" + resultGroup.getName() + "'))\n";
-            if (!actionSet.contains(actionStep)) {
-                sb.append(actionStep);
-                actionSet.add(actionStep);
-            }
-
-            String statementStep = "\t\t%% set substeps_Statement = e.get_substeps(substep, 'Statement', 'Main')\n";
-            if (!statementSet.contains(statementStep)) {
-                sb.append(statementStep);
-                statementSet.add(statementStep);
-            }
-            for (TestResult result : resultGroup.getResults()) {
-                String valueStep = "\t\t%% set _ = " + baseName + "_" + result.getName().toLowerCase().replaceAll("[^a-z0-9]", "_") + "_values.extend(e.get_value_and_status_from_action(substeps_Statement, '" + resultGroup.getName() + "', '" + result.getName() + "'))\n";
-                sb.append(valueStep);
+    private void appendActionValues(StringBuilder sb, Set<String> actionValuesSet) {
+        if (!actionValuesSet.isEmpty()) {
+            sb.append("\t%% set substeps_Action = e.get_substeps(step, 'Action', 'Main')\n");
+            for (String var : actionValuesSet) {
+                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_value_and_status_from_action(substeps_Action, '")
+                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
             }
         }
+    }
 
-        if (resultGroup.getGraph() != null) {
-            sb.append("\t\t%% if e.get_analog_waveform(substep, '").append(resultGroup.getName()).append("') != [] \n");
-            sb.append("\t\t\t%% set _ = ").append(baseName).append("_waveform.extend(e.get_analog_waveform(substep, '").append(resultGroup.getName()).append("'))\n");
-            sb.append("\t\t%% endif\n");
+    private void appendStatementValues(StringBuilder sb, Set<String> statementValuesSet) {
+        if (!statementValuesSet.isEmpty()) {
+            sb.append("\t%% set substeps_Statement = e.get_substeps(step, 'Statement', 'Main')\n");
+            for (String var : statementValuesSet) {
+                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_value_and_status_from_statement(substeps_Statement, '")
+                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
+            }
         }
+    }
 
-        return sb.toString();
+    private void appendNumericLimits(StringBuilder sb, Set<String> numericLimitSet) {
+        if (!numericLimitSet.isEmpty()) {
+            sb.append("\t%% set substeps_NumericLimitTest = e.get_substeps(step, 'NumericLimitTest', 'Main')\n");
+            for (String var : numericLimitSet) {
+                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_numeric_limits(substeps_NumericLimitTest, '")
+                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
+            }
+        }
+    }
+
+    private void appendWaveforms(StringBuilder sb, Set<String> waveformSet) {
+        for (String var : waveformSet) {
+            sb.append("\t%% if e.get_analog_waveform(step, '").append(extractTestName(var)).append("') != [] \n");
+            sb.append("\t\t%% set _ = ").append(var).append(".extend(e.get_analog_waveform(step, '").append(extractTestName(var)).append("'))\n");
+            sb.append("\t%% endif\n");
+        }
+    }
+
+    // Вспомогательные методы для работы с именами переменных
+    private String extractTestName(String var) {
+        return var.split("_")[0];
+    }
+
+    private String extractResultName(String var) {
+        String[] parts = var.split("_");
+        return parts[parts.length - 2] + " " + parts[parts.length - 1];
+    }
+
+    private String formatName(String name) {
+        return name.toLowerCase().replaceAll("[^a-z0-9]", "_");
     }
 }

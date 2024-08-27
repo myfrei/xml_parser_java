@@ -1,6 +1,9 @@
 package ru.white.xml_parser_java.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,5 +42,34 @@ public class StringManager {
         } else {
             return string;
         }
+    }
+
+    public static String getOriginName(String callerName) {
+        // Разделяем строку по пробелам
+        String[] parts = callerName.split(" ");
+
+        // Проверяем, что частей больше одной
+        if (parts.length > 1) {
+            // Объединяем все части начиная со второй (индекс 1)
+            String originName = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
+
+            // Убираем кавычку в конце, если она есть
+            if (originName.endsWith("\"")) {
+                originName = originName.replaceAll("\"$", "");
+            }
+
+            return originName;
+        } else {
+            // Если вдруг строка состоит только из одной части, возвращаем ее
+            return callerName.replaceAll("\"$", "");
+        }
+    }
+
+    public static String getStateType(JsonNode testGroupNode) {
+        JsonNode jsonNode = testGroupNode.get("Extension");
+        if (jsonNode != null) {
+            return String.valueOf(jsonNode.get("TSStepProperties").get("StepType"));
+        }
+        return null;
     }
 }

@@ -45,6 +45,7 @@ public class TestService {
                     TestResultGroup singleGroup = new TestResultGroup();
                     TestResultService singleTestResulService = new TestResultService();
                     singleGroup.setName(result.getName());
+                    singleGroup.setStageType(StringManager.getStateType(testNode));
                     singleGroup.setStatus(StatusType.fromString(StringManager.removeQuotes(JsonNodeManager.getStatus(testNode))).getRussianTranslation());
                     singleGroup.setResults(singleTestResulService.getTestResults(testNode));
                     singleGroup.setSelected(true);

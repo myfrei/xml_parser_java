@@ -35,13 +35,13 @@ public class TestGroupService {
             if (checkTestGroupOutcomeStatus(testGroupNode)) {
                 // Присвоение имени группе тестов.
                 if (testGroupNode.get("callerName") != null) {
-                    //TODO replase nubmer
-                    result.setOriginName(String.valueOf(testGroupNode.get("callerName")));
+                    result.setOriginName(StringManager.getOriginName(String.valueOf(testGroupNode.get("callerName"))));
                     result.setName(StringManager.getTestGroupName(String.valueOf(testGroupNode.get("callerName"))));
                 } else {
-                    result.setOriginName(String.valueOf(testGroupNode.get("name")));
+                    result.setOriginName(StringManager.getOriginName(String.valueOf(testGroupNode.get("name"))));
                     result.setName(StringManager.getTestGroupName(String.valueOf(testGroupNode.get("name"))));
                 }
+                result.setStageType(StringManager.getStateType(testGroupNode));
                 // Получение вложенных тестов и присвоение их текущей группе.
                 List<Test> tests = new ArrayList<>();
                 GlobalVariables.TARGET_TESTS_TAG_NAMES.forEach(tagName -> {

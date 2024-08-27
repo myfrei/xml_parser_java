@@ -8,6 +8,8 @@ public class TestResult {
     private UnitOption unitOption;
     private String validValues;
     private boolean selected;
+    private String stageType;
+
 
     @Override
     public String toString() {
@@ -17,9 +19,18 @@ public class TestResult {
                 ", value='" + value + '\'' +
                 ", unitValue='" + unitValue + '\'' +
                 ", unitOption=" + unitOption +
+                ", stageType=" + stageType +
                 ", validValues='" + validValues + '\'' +
                 ", selected=" + selected +
                 '}';
+    }
+
+    public String getStageType() {
+        return stageType;
+    }
+
+    public void setStageType(String stageType) {
+        this.stageType = stageType;
     }
 
     public TestResult() {
