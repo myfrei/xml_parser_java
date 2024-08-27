@@ -41,7 +41,6 @@ public class TexExportService {
         StringBuilder sb = new StringBuilder();
         sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:  \\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
 
-
         sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
         sb.append("\t%% set prec = 1\n\n");
 
@@ -56,15 +55,11 @@ public class TexExportService {
             for (TestResultGroup resultGroup : test.getResultGroups()) {
                 String baseName = formatName(resultGroup.getName());
 
-                switch (resultGroup.getStageType()) {
+                switch (resultGroup.getStageType().replaceAll("\"","")) {
                     case "PassFailTest":
                         passFailTestSet.add(baseName + "_exists");
                         break;
                     case "NumericLimitTest":
-                        for (TestResult result : resultGroup.getResults()) {
-                            numericLimitSet.add(baseName + "_" + formatName(result.getName()) + "_limits");
-                        }
-                        break;
                     case "NI_MultipleNumericLimitTest":
                         for (TestResult result : resultGroup.getResults()) {
                             numericLimitSet.add(baseName + "_" + formatName(result.getName()) + "_limits");
