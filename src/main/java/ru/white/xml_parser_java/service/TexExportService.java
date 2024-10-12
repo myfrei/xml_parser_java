@@ -20,12 +20,12 @@ public class TexExportService {
         String filePath = folderPath + "/" + fileName;
         //System.out.println(testGroups);
 
-//        List<Test> tests = testGroups.get(0).getTests();
-//        tests.stream().forEach(x -> {
-//            System.out.println(x.getName());
-//            System.out.println(x.getResultGroups());
-//            System.out.println("______");
-//        });
+        List<Test> tests = testGroups.get(0).getTests();
+        tests.stream().forEach(x -> {
+            System.out.println(x.getName());
+            System.out.println(x.getResultGroups());
+            System.out.println("______");
+        });
         try (FileWriter writer = new FileWriter(filePath)) {
             StringBuilder texContent = new StringBuilder();
             for (TestGroup testGroup : testGroups) {
@@ -39,7 +39,7 @@ public class TexExportService {
 
     private String formatTestGroup(TestGroup testGroup) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:  \\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
+        sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:\\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
 
         sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
         sb.append("\t%% set prec = 1\n\n");
@@ -71,8 +71,13 @@ public class TexExportService {
                         }
                         break;
                     case "Statement":
-                        for (TestResult result : resultGroup.getResults()) {
-                            statementValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
+                        if (resultGroup.isEmpty()) {
+                            // Обработка пустых групп Statement
+                            statementValuesSet.add(baseName + "_exists");
+                        } else {
+                            for (TestResult result : resultGroup.getResults()) {
+                                statementValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
+                            }
                         }
                         break;
                 }
@@ -108,6 +113,7 @@ public class TexExportService {
         for (String var : variables) {
             sb.append("\t%% set ").append(var).append(" = []\n");
         }
+        sb.append("\n");
     }
 
     private void appendTestStatus(StringBuilder sb, Set<String> passFailTestSet, String testType) {
@@ -115,9 +121,10 @@ public class TexExportService {
             sb.append("\t%% set substeps_").append(testType).append(" = e.get_substeps(step, '").append(testType).append("', 'Main')\n");
             for (String var : passFailTestSet) {
                 sb.append("\t%% set _ = ").append(var).append(".extend(e.get_test_status_by_name(substeps_").append(testType).append(", '")
-                        .append(extractTestName(var)).append("'))\n");
+                        .append(extractTestName2(var)).append("'))\n");
             }
         }
+        sb.append("\n");
     }
 
     private void appendActionValues(StringBuilder sb, Set<String> actionValuesSet) {
@@ -125,9 +132,10 @@ public class TexExportService {
             sb.append("\t%% set substeps_Action = e.get_substeps(step, 'Action', 'Main')\n");
             for (String var : actionValuesSet) {
                 sb.append("\t%% set _ = ").append(var).append(".extend(e.get_value_and_status_from_action(substeps_Action, '")
-                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
+                        .append(extractTestName2(var)).append("', '").append(extractResultName2(var)).append("'))\n");
             }
         }
+        sb.append("\n");
     }
 
     private void appendStatementValues(StringBuilder sb, Set<String> statementValuesSet) {
@@ -138,6 +146,7 @@ public class TexExportService {
                         .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
             }
         }
+        sb.append("\n");
     }
 
     private void appendNumericLimits(StringBuilder sb, Set<String> numericLimitSet) {
@@ -145,9 +154,10 @@ public class TexExportService {
             sb.append("\t%% set substeps_NumericLimitTest = e.get_substeps(step, 'NumericLimitTest', 'Main')\n");
             for (String var : numericLimitSet) {
                 sb.append("\t%% set _ = ").append(var).append(".extend(e.get_numeric_limits(substeps_NumericLimitTest, '")
-                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
+                        .append(extractTestName(var)).append("', '").append(extractResultName2(var)).append("'))\n");
             }
         }
+        sb.append("\n");
     }
 
     private void appendWaveforms(StringBuilder sb, Set<String> waveformSet) {
@@ -156,16 +166,40 @@ public class TexExportService {
             sb.append("\t\t%% set _ = ").append(var).append(".extend(e.get_analog_waveform(step, '").append(extractTestName(var)).append("'))\n");
             sb.append("\t%% endif\n");
         }
+        sb.append("\n");
     }
 
     // Вспомогательные методы для работы с именами переменных
+    //TODO имена в нижнюю строку оригинальный name
     private String extractTestName(String var) {
         return var.split("_")[0];
+    }
+
+    private String extractTestName2(String name) {
+        if ("check_tm_exists".equals(name)) {
+            return "Check TM";
+        } else if ("ni_dmm_check_voltage_ab1__measurement_values".equals(name)) {
+            return "NI DNN Check Voltage AB1";
+        } else {
+            return name.split("_")[0];
+        }
     }
 
     private String extractResultName(String var) {
         String[] parts = var.split("_");
         return parts[parts.length - 2] + " " + parts[parts.length - 1];
+    }
+
+    private String extractResultName2(String var) {
+
+        String[] parts = var.split("_");
+        String result = parts[parts.length - 2] + " " + parts[parts.length - 1];
+        if ("measurement values".equals(result)) {
+            return "Measurement";
+        } else if ("numeric limits".equals(result)) {
+            return "Numeric Limits";
+        }
+        return result;
     }
 
     private String formatName(String name) {
