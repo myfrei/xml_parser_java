@@ -41,6 +41,7 @@ public class TestGroupService {
                     result.setOriginName(StringManager.getOriginName(String.valueOf(testGroupNode.get("name"))));
                     result.setName(StringManager.getTestGroupName(String.valueOf(testGroupNode.get("name"))));
                 }
+                result.setStatus(String.valueOf(testGroupNode.get("Outcome").get("value")).replaceAll("\"", ""));
                 result.setStageType(StringManager.getStateType(testGroupNode));
                 // Получение вложенных тестов и присвоение их текущей группе.
                 List<Test> tests = new ArrayList<>();

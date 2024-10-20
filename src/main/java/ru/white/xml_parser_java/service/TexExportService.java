@@ -8,9 +8,7 @@ import ru.white.xml_parser_java.model.TestResultGroup;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TexExportService {
 
@@ -18,191 +16,128 @@ public class TexExportService {
     public void exportToTEX(List<TestGroup> testGroups, LocalDate date, String folderPath) {
         String fileName = "export_" + date.toString() + ".tex";
         String filePath = folderPath + "/" + fileName;
-        //System.out.println(testGroups);
 
-        List<Test> tests = testGroups.get(0).getTests();
-        tests.stream().forEach(x -> {
-            System.out.println(x.getName());
-            System.out.println(x.getResultGroups());
-            System.out.println("______");
-        });
         try (FileWriter writer = new FileWriter(filePath)) {
             StringBuilder texContent = new StringBuilder();
             for (TestGroup testGroup : testGroups) {
                 texContent.append(formatTestGroup(testGroup));
             }
-            writer.write(texContent.toString());
+            writer.write(texContent.toString() + testGroups.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String formatTestGroup(TestGroup testGroup) {
+    public String formatTestGroup(TestGroup testGroup) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\\VAR{full_number} {").append(testGroup.getOriginName()).append("}:\\underline{\\VAR{h.add_background_color(h.exist_result(step_status))|lower}}.\n\n");
+        Set<String>initializedVariables = new HashSet<>();
+        // Предположим, что у TestGroup есть методы getNumber(), getName(), getStatus()
+        String fullNumber = String.valueOf(testGroup.getOriginName());
+        String stepStatus = testGroup.getStatus();
 
-        sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
-        sb.append("\t%% set prec = 1\n\n");
+        // Формирование первой строки
+        sb.append("\\VAR{full_number} {").append(fullNumber).append("}:  ")
+                .append("\\underline{\\VAR{h.add_background_color(h.exist_result(")
+                .append("step_status").append("|lower}}.\n\n");
 
-        // Хранение всех уникальных переменных
-        Set<String> passFailTestSet = new HashSet<>();
-        Set<String> numericLimitSet = new HashSet<>();
-        Set<String> actionValuesSet = new HashSet<>();
-        Set<String> statementValuesSet = new HashSet<>();
-        Set<String> waveformSet = new HashSet<>();
+        // Проверка статуса шага
+        if ("Passed".equalsIgnoreCase(stepStatus) || "Failed".equalsIgnoreCase(stepStatus)) {
+            sb.append("%% if step_status == 'Passed' or step_status == 'Failed'\n\n");
 
-        for (Test test : testGroup.getTests()) {
-            for (TestResultGroup resultGroup : test.getResultGroups()) {
-                String baseName = formatName(resultGroup.getName());
+            sb.append("\t%% set prec = 1\n\n");
 
-                switch (resultGroup.getStageType().replaceAll("\"","")) {
-                    case "PassFailTest":
-                        passFailTestSet.add(baseName + "_exists");
-                        break;
-                    case "NumericLimitTest":
-                    case "NI_MultipleNumericLimitTest":
-                        for (TestResult result : resultGroup.getResults()) {
-                            numericLimitSet.add(baseName + "_" + formatName(result.getName()) + "_limits");
+            // Проходим по всем тестам и результатам
+            for (Test test : testGroup.getTests()) {
+                for (TestResultGroup resultGroup : test.getResultGroups()) {
+                    List<String> variableNames = generateVariableNames(test, resultGroup);
+
+                    for (String variableName : variableNames) {
+                        // Инициализируем список только если переменная еще не была инициализирована
+                        if (!initializedVariables.contains(variableName)) {
+                            sb.append("\t%% set ").append(variableName).append(" = []\n");
+                            initializedVariables.add(variableName);
                         }
-                        break;
-                    case "Action":
-                        for (TestResult result : resultGroup.getResults()) {
-                            actionValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
-                        }
-                        break;
-                    case "Statement":
-                        if (resultGroup.isEmpty()) {
-                            // Обработка пустых групп Statement
-                            statementValuesSet.add(baseName + "_exists");
-                        } else {
-                            for (TestResult result : resultGroup.getResults()) {
-                                statementValuesSet.add(baseName + "_" + formatName(result.getName()) + "_values");
-                            }
-                        }
-                        break;
-                }
 
-                if (resultGroup.getGraph() != null) {
-                    waveformSet.add(baseName + "_waveform");
+                        // Добавляем данные в переменную
+                        sb.append("\t%% set _ = ").append(variableName).append(".extend([])\n");
+                    }
                 }
             }
 
+            sb.append("\n");
+
+            // Обработка графиков
+            processGraphs(testGroup, sb, initializedVariables);
+
+            sb.append("%% endif\n");
         }
-
-        // Объявляем переменные как пустые списки
-        declareVariables(sb, passFailTestSet);
-        declareVariables(sb, numericLimitSet);
-        declareVariables(sb, actionValuesSet);
-        declareVariables(sb, statementValuesSet);
-        declareVariables(sb, waveformSet);
-
-        // Заполняем переменные данными
-        appendTestStatus(sb, passFailTestSet, "PassFailTest");
-        appendActionValues(sb, actionValuesSet);
-        appendStatementValues(sb, statementValuesSet);
-        appendNumericLimits(sb, numericLimitSet);
-        appendWaveforms(sb, waveformSet);
-
-        sb.append("\t%% print(decimate_graph_rs_transmite_waveform)\n");
-        sb.append("%% endif\n");
 
         return sb.toString();
     }
 
-    private void declareVariables(StringBuilder sb, Set<String> variables) {
-        for (String var : variables) {
-            sb.append("\t%% set ").append(var).append(" = []\n");
-        }
-        sb.append("\n");
-    }
+    private List<String> generateVariableNames(Test test, TestResultGroup resultGroup) {
+        String testName = sanitizeName(test.getName());
 
-    private void appendTestStatus(StringBuilder sb, Set<String> passFailTestSet, String testType) {
-        if (!passFailTestSet.isEmpty()) {
-            sb.append("\t%% set substeps_").append(testType).append(" = e.get_substeps(step, '").append(testType).append("', 'Main')\n");
-            for (String var : passFailTestSet) {
-                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_test_status_by_name(substeps_").append(testType).append(", '")
-                        .append(extractTestName2(var)).append("'))\n");
+        String stageType = resultGroup.getStageType();
+
+        List<String> variableNames = new ArrayList<>();
+
+        if ("PassFailTest".equals(stageType) || "Statement".equals(stageType)) {
+            // Суффикс "_exists"
+            variableNames.add(testName + "_exists");
+        } else if ("NumericLimitTest".equals(stageType) || "NI_MultipleNumericLimitTest".equals(stageType)) {
+            // Суффикс "_limits", используем имена результатов
+            if (resultGroup.getResults() != null && !resultGroup.getResults().isEmpty()) {
+                for (TestResult result : resultGroup.getResults()) {
+                    String resultName = sanitizeName(result.getName());
+                    variableNames.add(testName + "_" + resultName + "_limits");
+                }
+            } else {
+                variableNames.add(testName + "_limits");
             }
-        }
-        sb.append("\n");
-    }
-
-    private void appendActionValues(StringBuilder sb, Set<String> actionValuesSet) {
-        if (!actionValuesSet.isEmpty()) {
-            sb.append("\t%% set substeps_Action = e.get_substeps(step, 'Action', 'Main')\n");
-            for (String var : actionValuesSet) {
-                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_value_and_status_from_action(substeps_Action, '")
-                        .append(extractTestName2(var)).append("', '").append(extractResultName2(var)).append("'))\n");
+        } else if ("Action".equals(stageType)) {
+            if (resultGroup.getGraph() != null) {
+                // Суффикс "_waveform"
+                variableNames.add(testName + "_waveform");
+            } else {
+                // Суффикс "_values"
+                variableNames.add(testName + "_values");
             }
-        }
-        sb.append("\n");
-    }
-
-    private void appendStatementValues(StringBuilder sb, Set<String> statementValuesSet) {
-        if (!statementValuesSet.isEmpty()) {
-            sb.append("\t%% set substeps_Statement = e.get_substeps(step, 'Statement', 'Main')\n");
-            for (String var : statementValuesSet) {
-                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_value_and_status_from_statement(substeps_Statement, '")
-                        .append(extractTestName(var)).append("', '").append(extractResultName(var)).append("'))\n");
-            }
-        }
-        sb.append("\n");
-    }
-
-    private void appendNumericLimits(StringBuilder sb, Set<String> numericLimitSet) {
-        if (!numericLimitSet.isEmpty()) {
-            sb.append("\t%% set substeps_NumericLimitTest = e.get_substeps(step, 'NumericLimitTest', 'Main')\n");
-            for (String var : numericLimitSet) {
-                sb.append("\t%% set _ = ").append(var).append(".extend(e.get_numeric_limits(substeps_NumericLimitTest, '")
-                        .append(extractTestName(var)).append("', '").append(extractResultName2(var)).append("'))\n");
-            }
-        }
-        sb.append("\n");
-    }
-
-    private void appendWaveforms(StringBuilder sb, Set<String> waveformSet) {
-        for (String var : waveformSet) {
-            sb.append("\t%% if e.get_analog_waveform(step, '").append(extractTestName(var)).append("') != [] \n");
-            sb.append("\t\t%% set _ = ").append(var).append(".extend(e.get_analog_waveform(step, '").append(extractTestName(var)).append("'))\n");
-            sb.append("\t%% endif\n");
-        }
-        sb.append("\n");
-    }
-
-    // Вспомогательные методы для работы с именами переменных
-    //TODO имена в нижнюю строку оригинальный name
-    private String extractTestName(String var) {
-        return var.split("_")[0];
-    }
-
-    private String extractTestName2(String name) {
-        if ("check_tm_exists".equals(name)) {
-            return "Check TM";
-        } else if ("ni_dmm_check_voltage_ab1__measurement_values".equals(name)) {
-            return "NI DNN Check Voltage AB1";
         } else {
-            return name.split("_")[0];
+            // По умолчанию используем суффикс "_values"
+            variableNames.add(testName + "_values");
+        }
+
+        return variableNames;
+    }
+
+    private String sanitizeName(String name) {
+        // Удаляем начальные и конечные пробелы, заменяем пробелы и дефисы на подчеркивания, приводим к нижнему регистру
+        String sanitized = name.trim().toLowerCase().replaceAll("[-\\s]+", "_");
+        // Убираем все символы, кроме букв, цифр и подчеркиваний
+        sanitized = sanitized.replaceAll("[^a-z0-9_]", "");
+        return sanitized;
+    }
+
+    private void processGraphs(TestGroup testGroup, StringBuilder sb, Set<String> initializedVariables) {
+        // Проверяем наличие графиков и инициализируем переменные
+        for (Test test : testGroup.getTests()) {
+            for (TestResultGroup resultGroup : test.getResultGroups()) {
+                if (resultGroup.getGraph() != null) {
+                    String baseName = test.getName().trim().replaceAll("\\s+", "_").toLowerCase();
+                    String variableName = baseName + "_waveform";
+
+                    // Инициализируем переменную, если она еще не была инициализирована
+                    if (!initializedVariables.contains(variableName)) {
+                        sb.append("\t%% set ").append(variableName).append(" = []\n");
+                        initializedVariables.add(variableName);
+                    }
+
+                    // Добавляем данные в переменную (пока пустой список)
+                    sb.append("\t%% set _ = ").append(variableName).append(".extend([])\n");
+                }
+            }
         }
     }
 
-    private String extractResultName(String var) {
-        String[] parts = var.split("_");
-        return parts[parts.length - 2] + " " + parts[parts.length - 1];
-    }
-
-    private String extractResultName2(String var) {
-
-        String[] parts = var.split("_");
-        String result = parts[parts.length - 2] + " " + parts[parts.length - 1];
-        if ("measurement values".equals(result)) {
-            return "Measurement";
-        } else if ("numeric limits".equals(result)) {
-            return "Numeric Limits";
-        }
-        return result;
-    }
-
-    private String formatName(String name) {
-        return name.toLowerCase().replaceAll("[^a-z0-9]", "_");
-    }
 }
